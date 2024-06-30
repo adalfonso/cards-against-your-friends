@@ -1,0 +1,32 @@
+services:
+  app:
+    build:
+      context: .
+    ports:
+      # node server port
+      - 4201:4201
+      # node debug port
+      - 9229:9229
+      - 24678:24678
+    env_file:
+      - .env
+    volumes:
+      # bind project root during development for HMR
+      - ./client:/usr/src/app/client
+      - ./server:/usr/src/app/server
+      - ./common:/usr/src/app/common
+    command: pnpm dev
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:5.0
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb:/data/db
+      - mongodb_config:/data/configdb
+
+volumes:
+  mongodb:
+  mongodb_config:

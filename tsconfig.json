@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "allowImportingTsExtensions": true,
+    "strict": true,
+    "strictNullChecks": true,
+    "forceConsistentCasingInFileNames": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "paths": {
+      "@client/*": ["./client/*"],
+
+      "@common/*": ["./common/*"],
+
+      "@server/*": ["./server/*"],
+      "@controllers/*": ["./server/controllers/*"],
+      "@middleware/*": ["./server/middleware/*"],
+      "@routes/*": ["./server/routes/*"]
+    },
+    "typeRoots": ["./server/@types", "./node_modules/@types"]
+  },
+  "include": ["client", "common", "server"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}

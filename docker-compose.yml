@@ -1,0 +1,49 @@
+version: "3.8"
+
+services:
+  app:
+    container_name: cayf-app
+    image: TODO
+    restart: unless-stopped
+    ports:
+      - 4201:4201
+    env_file:
+      - .env
+    volumes:
+      # Map work dir paths to (shared) named volumes
+      - public_html:/usr/src/app/dist/client
+      - nginx_config:/usr/src/app/nginx
+    depends_on:
+      - mongo
+
+  mongo:
+    container_name: cayf-database
+    image: mongo:5.0
+    restart: unless-stopped
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb:/data/db
+      - mongodb_config:/data/configdb
+
+  nginx:
+    container_name: cayf-gateway
+    image: nginx:mainline-alpine
+    restart: unless-stopped
+    ports:
+      - 4200:4200
+    volumes:
+      - nginx_config:/etc/nginx/conf.d
+      - public_html:/var/www/html:ro
+
+      # TODO: Provide paths to SSL cert and key
+      - /path/to/cayf/certs/cayf.crt:/etc/ssl/cayf.crt
+      - /path/to/cayf/certs/cayf.key:/etc/ssl/cayf.key
+    depends_on:
+      - app
+
+volumes:
+  mongodb:
+  mongodb_config:
+  public_html:
+  nginx_config:
