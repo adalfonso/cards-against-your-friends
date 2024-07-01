@@ -7,6 +7,7 @@ services:
     restart: unless-stopped
     ports:
       - 4201:4201
+      - 4202:4202
     env_file:
       - .env
     volumes:

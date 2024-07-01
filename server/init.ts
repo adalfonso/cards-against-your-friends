@@ -1,9 +1,14 @@
 import dotenv from "dotenv";
 import express, { Express } from "express";
-
-// import { Database } from "./lib/data/Database";
+import { WebSocket, WebSocketServer } from "ws";
+import cookieParser from "cookie-parser";
 
 import { initRouter } from "@routes/router";
+import { Database as db } from "./lib/data/Database";
+import { randomUUID } from "crypto";
+
+const clients: Record<string, { ws: WebSocket }> = {};
+
 /**
  * Initialize the express app
  *
@@ -15,10 +20,33 @@ export const init = async (app: Express) => {
 
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+  app.use(cookieParser());
 
   initRouter(app);
 
-  // await Promise.all([Database.connect(env.MONGO_HOST, env.MONGO_PORT)]);
+  const wss = new WebSocketServer({ port: 4202 });
+
+  wss.on("connection", async (ws) => {
+    const id = randomUUID;
+    clients[id] = { ws };
+
+    ws.on("error", console.error);
+
+    ws.on("message", (data) => {
+      console.log("received: %s", data);
+    });
+
+    ws.send(JSON.stringify({ id }));
+
+    // const doc = await db.instance().game.create({ data: { code: "abcd" } });
+
+    console.log(db.instance());
+    const count = await db.instance().game.create({ data: { code: "abcd" } });
+
+    console.log({ count });
+
+    console.log({ clients });
+  });
 
   return env;
 };
@@ -27,8 +55,7 @@ export const init = async (app: Express) => {
 const required_vars = [
   "APP_PORT",
   "HOST",
-  "MONGO_HOST",
-  "MONGO_PORT",
+  "DATABASE_URL",
   "NODE_ENV",
   "NODE_PORT",
   "SOURCE_DIR",
@@ -36,8 +63,6 @@ const required_vars = [
 
 const defaults: Record<string, string> = {
   APP_PORT: "4200",
-  MONGO_HOST: "mongo",
-  MONGO_PORT: "27017",
   NODE_ENV: "development",
   NODE_PORT: "4201",
   SOURCE_DIR: "dist/client",
