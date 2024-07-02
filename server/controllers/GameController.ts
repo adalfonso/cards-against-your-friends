@@ -14,7 +14,7 @@ export const GameController = {
         data: { room_code: makeCode(4) },
       });
 
-      res.cookie("user_id", randomUUID(), { maxAge: 900000, httpOnly: true });
+      res.cookie("user_id", randomUUID(), { maxAge: 900000 });
 
       return game;
     } catch (e) {
@@ -32,7 +32,7 @@ export const GameController = {
         where: { room_code: room_code.toUpperCase() },
       });
 
-      res.cookie("user_id", randomUUID(), { maxAge: 900000, httpOnly: true });
+      res.cookie("user_id", randomUUID(), { maxAge: 900000 });
 
       return game;
     } catch (e) {

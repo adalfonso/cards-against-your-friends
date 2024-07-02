@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import { initRouter } from "@routes/router";
 import { Database as db } from "./lib/data/Database";
 import { randomUUID } from "crypto";
+import { WebsocketEventType } from "@common/types";
 
 const clients: Record<string, { ws: WebSocket }> = {};
 
@@ -27,25 +28,22 @@ export const init = async (app: Express) => {
   const wss = new WebSocketServer({ port: 4202 });
 
   wss.on("connection", async (ws) => {
-    const id = randomUUID;
-    clients[id] = { ws };
-
     ws.on("error", console.error);
 
-    ws.on("message", (data) => {
-      console.log("received: %s", data);
+    ws.on("message", (d) => {
+      console.info("Inbound websocket message: %s", d);
+      const data = JSON.parse(d.toString());
+
+      if (data.event_type === WebsocketEventType.Identify) {
+        const user_id = data.data;
+
+        if (!user_id) {
+          console.error("Failed to identify websocket client");
+          return;
+        }
+        clients[data.data] = { ws };
+      }
     });
-
-    ws.send(JSON.stringify({ id }));
-
-    // const doc = await db.instance().game.create({ data: { code: "abcd" } });
-
-    console.log(db.instance());
-    const count = await db.instance().game.create({ data: { code: "abcd" } });
-
-    console.log({ count });
-
-    console.log({ clients });
   });
 
   return env;
