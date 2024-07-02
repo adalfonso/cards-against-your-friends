@@ -1,6 +1,6 @@
-import { WebsocketEventType } from "../../common/types";
+import { WebSocketEventType } from "../../common/types";
 
-export const connectWebsocket = () => {
+export const connectWebSocket = () => {
   const user_id = document.cookie.replace(
     /(?:(?:^|.*;\s*)user_id\s*\=\s*([^;]*).*$)|^.*$/,
     "$1"
@@ -20,7 +20,7 @@ export const connectWebsocket = () => {
     console.info("Connected to websocket", { event });
 
     ws.send(
-      JSON.stringify({ event_type: WebsocketEventType.Identify, data: user_id })
+      JSON.stringify({ event_type: WebSocketEventType.Identify, data: user_id })
     );
   };
 

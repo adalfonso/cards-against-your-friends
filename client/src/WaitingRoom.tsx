@@ -4,8 +4,8 @@ import { useContext } from "preact/hooks";
 import "./WaitingRoom.scss";
 import { AppContext } from "./AppState";
 import { api } from "./Api";
-import { connectWebsocket } from "./websocket";
-
+import { connectWebSocket } from "./WebSocketClient";
+import { WebSocketEventType } from "../../common/types";
 export const WaitingRoom = () => {
   const { connection, room_code, owner, nickname } = useContext(AppContext);
   const busy = useSignal(false);
@@ -24,7 +24,7 @@ export const WaitingRoom = () => {
 
       room_code.value = game.room_code;
       owner.value = true;
-      connection.value = connectWebsocket();
+      connection.value = connectWebSocket();
     } catch (e) {
       console.error("Failed to create game", e);
     } finally {
@@ -43,7 +43,7 @@ export const WaitingRoom = () => {
       const game = await api.game.join.mutate({ room_code: value });
 
       room_code.value = game.room_code;
-      connection.value = connectWebsocket();
+      connection.value = connectWebSocket();
     } catch (e) {
       console.error("Failed to join game", e);
     } finally {
@@ -52,7 +52,7 @@ export const WaitingRoom = () => {
   };
 
   const submitNickname = async (value: string) => {
-    if (busy.value) {
+    if (busy.value || !connection.value) {
       return;
     }
 
@@ -63,6 +63,13 @@ export const WaitingRoom = () => {
         room_code: room_code.value,
         nickname: value,
       });
+
+      connection.value.send(
+        JSON.stringify({
+          event_type: WebSocketEventType.SetNickname,
+          data: value,
+        })
+      );
 
       nickname.value = value;
     } catch (e) {

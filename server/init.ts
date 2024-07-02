@@ -1,14 +1,9 @@
 import dotenv from "dotenv";
 import express, { Express } from "express";
-import { WebSocket, WebSocketServer } from "ws";
 import cookieParser from "cookie-parser";
 
 import { initRouter } from "@routes/router";
-import { Database as db } from "./lib/data/Database";
-import { randomUUID } from "crypto";
-import { WebsocketEventType } from "@common/types";
-
-const clients: Record<string, { ws: WebSocket }> = {};
+import { createWebSocketServer } from "./WebSocketSever";
 
 /**
  * Initialize the express app
@@ -24,27 +19,7 @@ export const init = async (app: Express) => {
   app.use(cookieParser());
 
   initRouter(app);
-
-  const wss = new WebSocketServer({ port: 4202 });
-
-  wss.on("connection", async (ws) => {
-    ws.on("error", console.error);
-
-    ws.on("message", (d) => {
-      console.info("Inbound websocket message: %s", d);
-      const data = JSON.parse(d.toString());
-
-      if (data.event_type === WebsocketEventType.Identify) {
-        const user_id = data.data;
-
-        if (!user_id) {
-          console.error("Failed to identify websocket client");
-          return;
-        }
-        clients[data.data] = { ws };
-      }
-    });
-  });
+  createWebSocketServer();
 
   return env;
 };
