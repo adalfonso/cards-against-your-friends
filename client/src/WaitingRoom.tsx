@@ -31,7 +31,7 @@ export const WaitingRoom = () => {
   //   ws.send("hello");
   // };
 
-  const newGame = async () => {
+  const createGame = async () => {
     if (busy.value) {
       return;
     }
@@ -44,7 +44,25 @@ export const WaitingRoom = () => {
       room_code.value = game.room_code;
       owner.value = true;
     } catch (e) {
-      console.error("Failed to start game", e);
+      console.error("Failed to create game", e);
+    } finally {
+      busy.value = false;
+    }
+  };
+
+  const joinGame = async (value: string) => {
+    if (busy.value) {
+      return;
+    }
+
+    busy.value = true;
+
+    try {
+      const game = await api.game.join.mutate({ room_code: value });
+
+      room_code.value = game.room_code;
+    } catch (e) {
+      console.error("Failed to join game", e);
     } finally {
       busy.value = false;
     }
@@ -84,10 +102,15 @@ export const WaitingRoom = () => {
             value={room_code_input.value}
             onInput={(e) => (room_code_input.value = e.currentTarget.value)}
           />
-          <button disabled={room_code_input.value.length !== 4}>JOIN</button>
-          <p classname="or">OR</p>
+          <button
+            disabled={room_code_input.value.length !== 4}
+            onClick={() => joinGame(room_code_input.value)}
+          >
+            JOIN
+          </button>
+          <p className="or">OR</p>
 
-          <button onClick={newGame}>NEW GAME</button>
+          <button onClick={createGame}>CREATE GAME</button>
         </>
       )}
 
@@ -98,7 +121,9 @@ export const WaitingRoom = () => {
           <input
             placeholder="Enter Nickname"
             value={nickname_input.value}
-            onInput={(e) => (nickname_input.value = e.currentTarget.value)}
+            onInput={(e) =>
+              (nickname_input.value = e.currentTarget.value.toUpperCase())
+            }
           />
           <button
             disabled={!nickname_input.value.length}
