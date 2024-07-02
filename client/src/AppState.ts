@@ -10,8 +10,9 @@ export const createAppState = () => {
   const owner = signal(false);
   const room_code = signal("");
   const user_id = signal("");
+  const nickname = signal("");
 
-  return { room_code, owner, user_id };
+  return { room_code, owner, nickname, user_id };
 };
 
 export const AppContext = createContext(createAppState());

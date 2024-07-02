@@ -6,10 +6,10 @@ import { AppContext } from "./AppState";
 import { api } from "./Api";
 
 export const WaitingRoom = () => {
-  const { room_code, owner } = useContext(AppContext);
+  const { room_code, owner, nickname } = useContext(AppContext);
   const busy = useSignal(false);
-  const nickname = useSignal("");
-  const nickname_last_submitted = useSignal("");
+  const nickname_input = useSignal("");
+  const room_code_input = useSignal("");
 
   // const [ws, setWs] = useState(
   //   (() => {
@@ -63,7 +63,7 @@ export const WaitingRoom = () => {
         nickname: value,
       });
 
-      nickname_last_submitted.value = value;
+      nickname.value = value;
     } catch (e) {
       console.error("Failed to submit your nickname", e);
     } finally {
@@ -75,11 +75,17 @@ export const WaitingRoom = () => {
 
   return (
     <div id="waiting-room">
+      <h2>Cards Against Your Friends</h2>
       {!room_code.value && (
         <>
-          <input type="text" placeholder="Enter Code" />
-          <button>JOIN</button>
-          <p>OR</p>
+          <input
+            type="text"
+            placeholder="Enter Room Code"
+            value={room_code_input.value}
+            onInput={(e) => (room_code_input.value = e.currentTarget.value)}
+          />
+          <button disabled={room_code_input.value.length !== 4}>JOIN</button>
+          <p classname="or">OR</p>
 
           <button onClick={newGame}>NEW GAME</button>
         </>
@@ -88,17 +94,23 @@ export const WaitingRoom = () => {
       {room_code.value && (
         <>
           <p>Room Code: {room_code.value}</p>
+          {nickname.value && <p>Nickname: {nickname.value}</p>}
           <input
-            placeholder="Enter Name"
-            value={nickname.value}
-            onInput={(e) => (nickname.value = e.currentTarget.value)}
+            placeholder="Enter Nickname"
+            value={nickname_input.value}
+            onInput={(e) => (nickname_input.value = e.currentTarget.value)}
           />
-          <button onClick={() => submitNickname(nickname.value)}>SUBMIT</button>
+          <button
+            disabled={!nickname_input.value.length}
+            onClick={() => submitNickname(nickname_input.value)}
+          >
+            SUBMIT
+          </button>
 
           {owner.value && (
             <button
               onClick={startGame}
-              disabled={!nickname.value || !nickname_last_submitted.value}
+              disabled={!nickname_input.value || !nickname.value}
             >
               START GAME
             </button>
