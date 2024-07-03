@@ -5,7 +5,7 @@ import "./WaitingRoom.scss";
 import { AppContext } from "./AppState";
 import { api } from "./Api";
 import { connectWebSocket } from "./WebSocketClient";
-import { WebSocketEventType } from "../../common/types";
+import { WebSocketClientEventType } from "../../common/types";
 export const WaitingRoom = () => {
   const { connection, room_code, owner, nickname } = useContext(AppContext);
   const busy = useSignal(false);
@@ -59,14 +59,9 @@ export const WaitingRoom = () => {
     busy.value = true;
 
     try {
-      await api.game.addOrUpdateUser.mutate({
-        room_code: room_code.value,
-        nickname: value,
-      });
-
       connection.value.send(
         JSON.stringify({
-          event_type: WebSocketEventType.SetNickname,
+          event_type: WebSocketClientEventType.SetNickname,
           data: value,
         })
       );

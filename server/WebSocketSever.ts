@@ -1,5 +1,8 @@
 import { WebSocket, WebSocketServer } from "ws";
-import { WebSocketEventType } from "@common/types";
+import {
+  WebSocketClientEventType,
+  WebSocketServerEventType,
+} from "@common/types";
 
 // In-memory stores; convert to cache
 const clients: Record<string, { ws: WebSocket }> = {};
@@ -17,11 +20,17 @@ export const createWebSocketServer = () => {
       const data = JSON.parse(payload.toString()) ?? {};
 
       switch (data.event_type) {
-        case WebSocketEventType.Identify:
+        case WebSocketClientEventType.Identify:
           return identify(ws, data.data);
 
-        case WebSocketEventType.SetNickname:
+        case WebSocketClientEventType.SetNickname:
           return setNickname(ws, data.data);
+
+        default:
+          console.error(
+            "Received unknown websocket event type:",
+            data.event_type
+          );
       }
     });
   });
@@ -33,6 +42,16 @@ const identify = (ws: WebSocket, user_id: unknown) => {
   }
 
   clients[user_id] = { ws };
+
+  ws.send(
+    JSON.stringify({
+      event_type: WebSocketServerEventType.InformIdentity,
+      data: {
+        user_id,
+        nickname: nicknames[user_id] ?? "",
+      },
+    })
+  );
 };
 
 const setNickname = (ws: WebSocket, nickname: unknown) => {
@@ -45,8 +64,6 @@ const setNickname = (ws: WebSocket, nickname: unknown) => {
   if (!user_id) {
     return console.error("Could not find user_id to set nickname");
   }
-
-  console.log({ games });
 
   nicknames[user_id] = nickname;
 };

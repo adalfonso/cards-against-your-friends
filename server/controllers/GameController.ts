@@ -1,16 +1,14 @@
-import { games } from "@server/WebSocketSever";
-import { Database } from "@server/lib/data/Database";
-import {
-  addOrUpdateUserSchema,
-  joinGameSchema,
-} from "@server/schema/GameSchema";
-import { Request } from "@server/trpc";
 import { TRPCError } from "@trpc/server";
 import { randomUUID } from "crypto";
-import { Response } from "express";
+import { Request as ExpressReq, Response as ExpressRes } from "express";
+
+import { games } from "@server/WebSocketSever";
+import { Database } from "@server/lib/data/Database";
+import { joinGameSchema } from "@server/schema/GameSchema";
+import { Request } from "@server/trpc";
 
 export const GameController = {
-  create: async ({ ctx: { res } }: Request) => {
+  create: async ({ ctx: { req, res } }: Request) => {
     try {
       const room_code = makeCode(4);
 
@@ -18,7 +16,7 @@ export const GameController = {
         data: { room_code: room_code },
       });
 
-      initUserId(room_code, res);
+      initUserId(room_code, req, res);
 
       return game;
     } catch (e) {
@@ -28,7 +26,10 @@ export const GameController = {
     }
   },
 
-  join: async ({ input, ctx: { res } }: Request<typeof joinGameSchema>) => {
+  join: async ({
+    input,
+    ctx: { req, res },
+  }: Request<typeof joinGameSchema>) => {
     try {
       const room_code = input.room_code.toUpperCase();
 
@@ -36,37 +37,9 @@ export const GameController = {
         where: { room_code },
       });
 
-      initUserId(room_code, res);
+      initUserId(room_code, req, res);
 
       return game;
-    } catch (e) {
-      console.error(e);
-
-      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-    }
-  },
-
-  addOrUpdateUser: async ({
-    ctx: { user_id },
-    input,
-  }: Request<typeof addOrUpdateUserSchema>) => {
-    const { nickname, room_code } = input;
-
-    const game = await Database.instance().game.findUniqueOrThrow({
-      where: { room_code },
-    });
-
-    await Database.instance().game.update({
-      where: { id: game.id },
-      data: {
-        players: {
-          ...((typeof game.players === "object" && game.players) ?? {}),
-          [user_id ?? ""]: nickname,
-        },
-      },
-    });
-
-    try {
     } catch (e) {
       console.error(e);
 
@@ -80,10 +53,12 @@ const makeCode = (length: number, chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ") =>
     .map(() => chars.charAt(Math.floor(Math.random() * chars.length)))
     .join("");
 
-const initUserId = (room_code: string, res: Response) => {
-  const user_id = randomUUID();
+const initUserId = (room_code: string, req: ExpressReq, res: ExpressRes) => {
+  const user_id = req.cookies.user_id ?? randomUUID();
 
-  res.cookie("user_id", randomUUID(), { maxAge: 900000 });
+  if (!req.cookies.user_id) {
+    res.cookie("user_id", user_id, { maxAge: 900000, sameSite: "strict" });
+  }
 
   if (!games[room_code]) {
     games[room_code] = { players: [] };

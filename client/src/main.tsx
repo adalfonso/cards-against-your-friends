@@ -1,9 +1,9 @@
 import { render } from "preact";
 import { App } from "./app.tsx";
-import { AppContext, createAppState } from "./AppState.ts";
+import { AppContext, app_state } from "./AppState.ts";
 
 render(
-  <AppContext.Provider value={createAppState()}>
+  <AppContext.Provider value={app_state}>
     <App />
   </AppContext.Provider>,
   document.getElementById("app")!

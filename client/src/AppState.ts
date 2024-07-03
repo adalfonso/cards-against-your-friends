@@ -7,14 +7,12 @@ export type AppState = {
   owner: boolean;
 };
 
-export const createAppState = () => {
-  const owner = signal(false);
-  const room_code = signal("");
-  const user_id = signal("");
-  const nickname = signal("");
-  const connection = signal<Maybe<WebSocket>>(null);
+const owner = signal(false);
+const room_code = signal("");
+const user_id = signal("");
+const nickname = signal("");
+const connection = signal<Maybe<WebSocket>>(null);
 
-  return { connection, room_code, owner, nickname, user_id };
-};
+export const app_state = { connection, room_code, owner, nickname, user_id };
 
-export const AppContext = createContext(createAppState());
+export const AppContext = createContext(app_state);

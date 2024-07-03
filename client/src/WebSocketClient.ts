@@ -1,4 +1,8 @@
-import { WebSocketEventType } from "../../common/types";
+import {
+  WebSocketClientEventType,
+  WebSocketServerEventType,
+} from "../../common/types";
+import { app_state } from "./AppState";
 
 export const connectWebSocket = () => {
   const user_id = document.cookie.replace(
@@ -20,13 +24,38 @@ export const connectWebSocket = () => {
     console.info("Connected to websocket", { event });
 
     ws.send(
-      JSON.stringify({ event_type: WebSocketEventType.Identify, data: user_id })
+      JSON.stringify({
+        event_type: WebSocketClientEventType.Identify,
+        data: user_id,
+      })
     );
   };
 
   ws.addEventListener("message", (event) => {
-    console.log("Message over websocker ", event.data);
+    console.log("Message received over websocket", event.data);
+
+    const payload = JSON.parse(event.data) ?? {};
+
+    switch (payload.event_type) {
+      case WebSocketServerEventType.InformIdentity:
+        return informIdentity(payload.data);
+      default:
+        console.error(
+          "Received unknown websocket event type:",
+          payload.event_type
+        );
+    }
   });
 
   return ws;
+};
+
+const informIdentity = ({
+  nickname,
+}: {
+  user_id: string;
+  nickname: string;
+}) => {
+  // Set cached nickname if there is one
+  app_state.nickname.value = nickname;
 };
