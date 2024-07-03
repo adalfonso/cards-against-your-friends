@@ -26,7 +26,9 @@ export const WaitingRoom = () => {
       owner.value = true;
       connection.value = connectWebSocket();
     } catch (e) {
-      console.error("Failed to create game", e);
+      const message = "Failed to create game";
+      console.error(message, e);
+      alert(message);
     } finally {
       busy.value = false;
     }
@@ -45,7 +47,9 @@ export const WaitingRoom = () => {
       room_code.value = game.room_code;
       connection.value = connectWebSocket();
     } catch (e) {
-      console.error("Failed to join game", e);
+      const message = "Failed to join game";
+      console.error(message, e);
+      alert(message);
     } finally {
       busy.value = false;
     }
@@ -68,13 +72,32 @@ export const WaitingRoom = () => {
 
       nickname.value = value;
     } catch (e) {
-      console.error("Failed to submit your nickname", e);
+      // TODO: I don't think this error handling actually works for the websocket
+      const message = "Failed to submit your nickname";
+      console.error(message, e);
+      alert(message);
     } finally {
       busy.value = false;
     }
   };
 
-  const startGame = () => {};
+  const startGame = async () => {
+    if (busy.value || !connection.value) {
+      return;
+    }
+
+    busy.value = true;
+
+    try {
+      await api.game.start.mutate({ room_code: room_code.value });
+    } catch (e) {
+      const message = `Failed to start game: ${e.message}`;
+      console.error(message, e);
+      alert(message);
+    } finally {
+      busy.value = false;
+    }
+  };
 
   return (
     <div id="waiting-room">
@@ -118,10 +141,7 @@ export const WaitingRoom = () => {
           </button>
 
           {owner.value && (
-            <button
-              onClick={startGame}
-              disabled={!nickname_input.value || !nickname.value}
-            >
+            <button onClick={startGame} disabled={!nickname.value}>
               START GAME
             </button>
           )}

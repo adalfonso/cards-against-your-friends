@@ -1,9 +1,15 @@
 import { GameController } from "@controllers/GameController";
-import { joinGameSchema } from "@server/schema/GameSchema";
-import { publicProcedure, router } from "@server/trpc";
+import { roomCodePayloadSchema } from "@server/schema/GameSchema";
+import { publicProcedure, authenticatedProcedure, router } from "@server/trpc";
 
 export const GameRouter = (routes: typeof router) =>
   routes({
     create: publicProcedure.mutation(GameController.create),
-    join: publicProcedure.input(joinGameSchema).mutation(GameController.join),
+    join: publicProcedure
+      .input(roomCodePayloadSchema)
+      .mutation(GameController.join),
+
+    start: authenticatedProcedure
+      .input(roomCodePayloadSchema)
+      .mutation(GameController.start),
   });

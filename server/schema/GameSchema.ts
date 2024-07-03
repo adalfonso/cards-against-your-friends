@@ -1,5 +1,5 @@
 import z from "zod";
 
-export const joinGameSchema = z.object({
+export const roomCodePayloadSchema = z.object({
   room_code: z.string(),
 });

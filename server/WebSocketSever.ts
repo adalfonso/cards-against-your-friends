@@ -6,8 +6,8 @@ import {
 
 // In-memory stores; convert to cache
 const clients: Record<string, { ws: WebSocket }> = {};
-const nicknames: Record<string, string> = {};
-export const games: Record<string, { players: Array<string> }> = {};
+export const nicknames: Record<string, string> = {};
+export const games: Record<string, { players: Set<string> }> = {};
 
 export const createWebSocketServer = () => {
   const wss = new WebSocketServer({ port: 4202 });

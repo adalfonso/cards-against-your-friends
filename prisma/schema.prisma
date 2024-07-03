@@ -14,8 +14,9 @@ datasource db {
 }
 
 model Game {
-  id         String @id @default(auto()) @map("_id") @db.ObjectId
-  room_code  String @unique
-  players    Json @default("{}")
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  room_code  String    @unique
+  players    Json      @default("{}")
   created_at DateTime  @default(now()) @db.Timestamp()
+  created_by String
 }
