@@ -43,13 +43,19 @@ export const connectWebSocket = () => {
         return informIdentity(payload.data);
 
       case WebSocketServerEvent.StartGame:
-        return (app_state.game_state.value = GameState.ACTIVE);
+        return (app_state.player_state.value = GameState.ACTIVE);
 
       case WebSocketServerEvent.InitPrompter:
         return initPrompter(payload.data);
 
       case WebSocketServerEvent.InitPromptee:
         return initPromptee(payload.data);
+
+      case WebSocketServerEvent.DeliverPromptResponses:
+        return deliverPromptResponses(payload.data);
+
+      case WebSocketServerEvent.WaitForNextRound:
+        return waitForNextRound();
       default:
         console.error(
           "Received unknown websocket event type:",
@@ -85,6 +91,20 @@ const initPromptee = ({
 }) => {
   app_state.is_prompter.value = false;
   app_state.prompt.value = "";
-  app_state.prompt_responses.value = content;
+  app_state.responses_for_promptee.value = content;
   app_state.prompt_response_count.value = prompt_response_count;
+};
+
+const deliverPromptResponses = ({
+  content,
+}: {
+  content: Record<string, Array<string>>;
+}) => {
+  app_state.responses_for_prompter.value = content;
+  app_state.player_state.value = "PROMPTER_DECIDING";
+};
+
+const waitForNextRound = () => {
+  app_state.player_state.value = "PROMPTEE_WAITING";
+  app_state.responses_for_promptee.value = [];
 };

@@ -1,7 +1,7 @@
 import { WebSocket } from "ws";
 
 import { WebSocketServerEvent } from "@common/types";
-import { clients, nicknames } from "./WebSocketSever";
+import { clients, games, nicknames } from "./WebSocketServer";
 
 // Associates user_id with client's websocket
 export const identify = (ws: WebSocket, user_id: unknown) => {
@@ -46,4 +46,31 @@ export const getUserIdFromWebsocket = (ws: WebSocket) => {
   const [user_id] = client_entry ?? [];
 
   return user_id ?? null;
+};
+
+// Updates the responses for a promptee
+export const receivePromptResponses = (
+  ws: WebSocket,
+  {
+    room_code,
+    prompt_responses,
+  }: { room_code: string; prompt_responses: Array<string> }
+) => {
+  if (!Array.isArray(prompt_responses)) {
+    return console.error("Failed to prompt responses from user");
+  }
+
+  const user_id = getUserIdFromWebsocket(ws);
+
+  if (!user_id) {
+    return console.error("Could not find user_id to set nickname");
+  }
+
+  const game = games[room_code];
+
+  if (!game) {
+    return console.error("Could not find game for: " + room_code);
+  }
+
+  game.receivePromptResponses(prompt_responses, user_id);
 };

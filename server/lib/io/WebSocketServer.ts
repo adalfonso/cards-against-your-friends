@@ -1,6 +1,6 @@
 import { WebSocket, WebSocketServer } from "ws";
 import { WebSocketClientEvent } from "@common/types";
-import { identify, setNickname } from "./incoming";
+import { identify, receivePromptResponses, setNickname } from "./incoming";
 import { Game } from "../game/Game";
 
 // In-memory stores; convert to cache
@@ -14,21 +14,24 @@ export const createWebSocketServer = () => {
   wss.on("connection", async (ws) => {
     ws.on("error", console.error);
 
-    ws.on("message", (payload) => {
-      console.info("Inbound websocket message: %s", payload);
-      const data = JSON.parse(payload.toString()) ?? {};
+    ws.on("message", (event) => {
+      console.info("Inbound websocket message: %s", event);
+      const payload = JSON.parse(event.toString()) ?? {};
 
-      switch (data.event_type) {
+      switch (payload.event_type) {
         case WebSocketClientEvent.Identify:
-          return identify(ws, data.data);
+          return identify(ws, payload.data);
 
         case WebSocketClientEvent.SetNickname:
-          return setNickname(ws, data.data);
+          return setNickname(ws, payload.data.nickname);
+
+        case WebSocketClientEvent.SendPromptResponses:
+          return receivePromptResponses(ws, payload.data);
 
         default:
           console.error(
             "Received unknown websocket event type:",
-            data.event_type
+            payload.event_type
           );
       }
     });

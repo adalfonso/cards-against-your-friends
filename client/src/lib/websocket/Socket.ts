@@ -19,7 +19,19 @@ export class Socket {
     Socket.connection.send(
       JSON.stringify({
         event_type: WebSocketClientEvent.SetNickname,
-        data: nickname,
+        data: { nickname },
+      })
+    );
+  }
+
+  static sendPromptResponses(
+    room_code: string,
+    prompt_responses: Array<string>
+  ) {
+    Socket.connection.send(
+      JSON.stringify({
+        event_type: WebSocketClientEvent.SendPromptResponses,
+        data: { room_code, prompt_responses },
       })
     );
   }

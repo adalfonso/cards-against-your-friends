@@ -4,18 +4,22 @@ import { AppContext } from "./AppState";
 import "./PlayerTurn.scss";
 import { useSignal } from "@preact/signals";
 import { SelectedCards } from "./PlayerTurn/SelectedCards";
+import { Socket } from "./lib/websocket/Socket";
 
 export const PlayerTurn = () => {
   const selected_cards = useSignal<Array<string>>([]);
   const {
     is_prompter,
     prompt,
-    prompt_responses,
+    responses_for_promptee,
     prompt_response_count,
     nickname,
+    room_code,
   } = useContext(AppContext);
 
-  const cards = is_prompter.value ? [prompt.value] : prompt_responses.value;
+  const cards = is_prompter.value
+    ? [prompt.value]
+    : responses_for_promptee.value;
 
   const selectCard = (prompt_response: string) => {
     if (is_prompter.value) {
@@ -29,19 +33,29 @@ export const PlayerTurn = () => {
     selected_cards.value = [...selected_cards.value, prompt_response];
   };
 
+  const sendPromptResponses = () => {
+    Socket.sendPromptResponses(room_code.value, selected_cards.value);
+  };
+
   return (
     <div id="player-turn" className={is_prompter.value ? "prompter" : ""}>
       <h2>{nickname.value}</h2>
       <div className="card-carousel">
         {cards.map((text) => {
+          const cleaned_text = clean(text);
+
+          const selected =
+            !is_prompter.value && selected_cards.value.includes(text);
           return (
             <div
               className="playing-card"
               onClick={() => {
-                selectCard(clean(text));
+                selectCard(text);
               }}
             >
-              <div>{clean(text)}</div>
+              <div>{cleaned_text}</div>
+
+              {selected && <div className="star">★</div>}
             </div>
           );
         })}
@@ -52,8 +66,17 @@ export const PlayerTurn = () => {
             <SelectedCards selected_cards={selected_cards} />
           </div>
 
-          <button onClick={() => (selected_cards.value = [])}>Redo</button>
-          <button>Send!</button>
+          <div className="buttons">
+            <button onClick={() => (selected_cards.value = [])}>Redo</button>
+            <button
+              disabled={
+                selected_cards.value.length !== prompt_response_count.value
+              }
+              onClick={sendPromptResponses}
+            >
+              Send!
+            </button>
+          </div>
         </div>
       )}
     </div>

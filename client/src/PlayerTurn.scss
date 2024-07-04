@@ -14,9 +14,12 @@
     margin-right: 2rem;
     font-size: 1.75rem;
     aspect-ratio: 20/28;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 
-    &.selected {
-      background: blue;
+    > .star {
+      text-align: right;
     }
 
     &:last-of-type {
@@ -30,15 +33,20 @@
 
   .selected-cards {
     font-size: 1.25rem;
-    margin: 1rem 1rem;
+    margin: 1rem 0;
     display: flex;
     flex-direction: column;
     > div {
       margin-bottom: 3rem;
     }
 
-    button {
-      display: block;
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+
+      button {
+        display: flex;
+      }
     }
   }
 
@@ -50,4 +58,16 @@
       }
     }
   }
+}
+
+.star {
+  color: gold;
+
+  text-shadow: 1px 1px 1px #1a1a1a;
+  font-size: 3rem;
+  text-shadow:
+    -1px -1px 0 #1a1a1a,
+    1px -1px 0 #1a1a1a,
+    -1px 1px 0 #1a1a1a,
+    1px 1px 0 #1a1a1a;
 }

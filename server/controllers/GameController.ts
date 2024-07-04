@@ -5,7 +5,7 @@ import { GameState } from "@prisma/client";
 
 import { Database } from "@server/lib/data/Database";
 import { Request } from "@server/trpc";
-import { clients, games, nicknames } from "@server/lib/io/WebSocketSever";
+import { clients, games, nicknames } from "@server/lib/io/WebSocketServer";
 import { roomCodePayloadSchema } from "@server/schema/GameSchema";
 import { Game } from "@server/lib/game/Game";
 

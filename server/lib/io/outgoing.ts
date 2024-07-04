@@ -24,6 +24,27 @@ export const initPromptee = (
   );
 };
 
+export const deliverPromptResponses = (
+  ws: WebSocket,
+  content: Record<string, string[]>
+) => {
+  ws.send(
+    JSON.stringify({
+      event_type: WebSocketServerEvent.DeliverPromptResponses,
+      data: { content },
+    })
+  );
+};
+
+export const waitForNextRound = (ws: WebSocket) => {
+  ws.send(
+    JSON.stringify({
+      event_type: WebSocketServerEvent.WaitForNextRound,
+      data: {},
+    })
+  );
+};
+
 export const startGame = (ws: WebSocket) => {
   ws.send(
     JSON.stringify({

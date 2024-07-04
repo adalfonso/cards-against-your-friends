@@ -1,6 +1,12 @@
 import { Maybe } from "@common/types";
-import { clients } from "../io/WebSocketSever";
-import { initPromptee, initPrompter, startGame } from "../io/outgoing";
+import { clients } from "../io/WebSocketServer";
+import {
+  deliverPromptResponses as deliverPromptResponsesToPrompter,
+  initPromptee,
+  initPrompter,
+  startGame,
+  waitForNextRound,
+} from "../io/outgoing";
 
 import { prompts, prompt_responses } from "@server/content";
 
@@ -20,6 +26,8 @@ export class Game {
     prompts: [],
     prompt_responses: [],
   };
+
+  private _received_prompt_responses: Record<string, Array<string>> = {};
 
   constructor(
     private _room_code: string,
@@ -57,24 +65,31 @@ export class Game {
   }
 
   public nextTurn() {
+    this._received_prompt_responses = {};
     this._rotatePrompter();
 
-    const players = this.players;
+    const prompt = this._nextTurnPrompter(this.prompter);
+    const prompt_response_count = countPrompts(prompt);
 
-    const prompter = players.find(
+    this.promptees.forEach((player) => {
+      this._nextTurnPromptee(player, prompt_response_count);
+    });
+  }
+
+  get prompter() {
+    const prompter = this.players.find(
       (user_id) => user_id === this._current_prompter
     );
 
-    const prompt = this._nextTurnPrompter(prompter as string);
-    const prompt_response_count = countPrompts(prompt);
+    if (!prompter) {
+      throw new Error(`Could not find prompter`);
+    }
 
-    players.forEach((player) => {
-      if (player === this._current_prompter) {
-        return;
-      }
+    return prompter;
+  }
 
-      this._nextTurnPromptee(player, prompt_response_count);
-    });
+  get promptees() {
+    return this.players.filter((player) => player !== this.prompter);
   }
 
   private _nextTurnPrompter(player: string) {
@@ -117,6 +132,28 @@ export class Game {
       } else {
         this._current_prompter = players[current_prompter_index + 1];
       }
+    }
+  }
+
+  public receivePromptResponses(
+    prompt_responses: Array<string>,
+    player: string
+  ) {
+    this._received_prompt_responses[player] = prompt_responses;
+
+    const received_all_prompt_responses =
+      Object.keys(this._received_prompt_responses).length ===
+      this._players.size - 1;
+
+    if (received_all_prompt_responses) {
+      deliverPromptResponsesToPrompter(
+        clients[this.prompter].ws,
+        this._received_prompt_responses
+      );
+
+      this.promptees.forEach((player) => {
+        waitForNextRound(clients[player].ws);
+      });
     }
   }
 }
