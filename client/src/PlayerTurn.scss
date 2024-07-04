@@ -8,21 +8,29 @@
     position: relative;
     background-color: #fafafa;
     border: 1px solid #1a1a1a;
-    border-radius: 0.5rem;
-    min-width: calc(100% - 2rem);
+    border-radius: 1rem;
+    min-width: calc(100% - 2px);
     width: 100%;
-    margin: 0 1rem;
+    margin-right: 2rem;
     font-size: 1.75rem;
-    aspect-ratio: 2/3;
+    aspect-ratio: 20/28;
+
+    &.selected {
+      background: blue;
+    }
+
+    &:last-of-type {
+      margin-right: 0;
+    }
 
     > div {
-      padding: 1.25rem 2rem;
+      padding: 1.5rem 2rem;
     }
   }
 
-  .prompt-response-to-send {
+  .selected-cards {
     font-size: 1.25rem;
-    margin: 3rem 1rem;
+    margin: 1rem 1rem;
     display: flex;
     flex-direction: column;
     > div {

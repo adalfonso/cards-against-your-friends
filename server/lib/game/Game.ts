@@ -59,39 +59,48 @@ export class Game {
   public nextTurn() {
     this._rotatePrompter();
 
-    this._players.forEach((player) => {
-      const is_prompter = player === this._current_prompter;
+    const players = this.players;
 
-      if (is_prompter) {
-        this._nextTurnPrompter(player);
-      } else {
-        this._nextTurnPromptee(player);
+    const prompter = players.find(
+      (user_id) => user_id === this._current_prompter
+    );
+
+    const prompt = this._nextTurnPrompter(prompter as string);
+    const prompt_response_count = countPrompts(prompt);
+
+    players.forEach((player) => {
+      if (player === this._current_prompter) {
+        return;
       }
+
+      this._nextTurnPromptee(player, prompt_response_count);
     });
   }
 
   private _nextTurnPrompter(player: string) {
     const connection = clients[player];
 
-    const content = this._content.prompts.pop() ?? "RAN OUT OF PROMPTS";
+    const prompt = this._content.prompts.pop() ?? "RAN OUT OF PROMPTS";
 
-    this._recycling_bin.prompts.push(content);
+    this._recycling_bin.prompts.push(prompt);
 
-    initPrompter(connection.ws, content);
+    initPrompter(connection.ws, prompt);
+
+    return prompt;
   }
 
-  private _nextTurnPromptee(player: string) {
+  private _nextTurnPromptee(player: string, prompt_response_count: number) {
     const connection = clients[player];
 
-    const content = new Array(card_hand_size)
+    const prompt_responses = new Array(card_hand_size)
       .fill(0)
       .map(
         () => this._content.prompt_responses.pop() ?? "RAN OUT OF RESPONSES"
       );
 
-    this._recycling_bin.prompt_responses.push(...content);
+    this._recycling_bin.prompt_responses.push(...prompt_responses);
 
-    initPromptee(connection.ws, content);
+    initPromptee(connection.ws, prompt_responses, prompt_response_count);
   }
 
   // Set the next player to be the prompter
@@ -124,4 +133,12 @@ const shuffle = (array: string[]) => {
       array[currentIndex],
     ];
   }
+};
+
+const countPrompts = (prompt: string) => {
+  const regex = /_+/g;
+
+  const matches = prompt.match(regex);
+
+  return matches ? matches.length : 1;
 };

@@ -1,4 +1,5 @@
 import { GameState } from "@prisma/client";
+
 import {
   WebSocketClientEvent,
   WebSocketServerEvent,
@@ -75,8 +76,15 @@ const initPrompter = ({ content }: { content: string }) => {
   app_state.prompt.value = content;
 };
 
-const initPromptee = ({ content }: { content: string[] }) => {
+const initPromptee = ({
+  content,
+  prompt_response_count,
+}: {
+  content: string[];
+  prompt_response_count: number;
+}) => {
   app_state.is_prompter.value = false;
   app_state.prompt.value = "";
   app_state.prompt_responses.value = content;
+  app_state.prompt_response_count.value = prompt_response_count;
 };

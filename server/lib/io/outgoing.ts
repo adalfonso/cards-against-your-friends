@@ -11,11 +11,15 @@ export const initPrompter = (ws: WebSocket, content: string) => {
   );
 };
 
-export const initPromptee = (ws: WebSocket, content: string[]) => {
+export const initPromptee = (
+  ws: WebSocket,
+  content: string[],
+  prompt_response_count: number
+) => {
   ws.send(
     JSON.stringify({
       event_type: WebSocketServerEvent.InitPromptee,
-      data: { content },
+      data: { content, prompt_response_count },
     })
   );
 };

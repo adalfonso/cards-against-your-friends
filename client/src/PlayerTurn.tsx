@@ -3,11 +3,17 @@ import { useContext } from "preact/hooks";
 import { AppContext } from "./AppState";
 import "./PlayerTurn.scss";
 import { useSignal } from "@preact/signals";
+import { SelectedCards } from "./PlayerTurn/SelectedCards";
 
 export const PlayerTurn = () => {
-  const selected_card = useSignal("");
-  const { is_prompter, prompt, prompt_responses, nickname } =
-    useContext(AppContext);
+  const selected_cards = useSignal<Array<string>>([]);
+  const {
+    is_prompter,
+    prompt,
+    prompt_responses,
+    prompt_response_count,
+    nickname,
+  } = useContext(AppContext);
 
   const cards = is_prompter.value ? [prompt.value] : prompt_responses.value;
 
@@ -16,7 +22,11 @@ export const PlayerTurn = () => {
       return;
     }
 
-    selected_card.value = prompt_response;
+    if (prompt_response_count.value === selected_cards.value.length) {
+      return;
+    }
+
+    selected_cards.value = [...selected_cards.value, prompt_response];
   };
 
   return (
@@ -36,12 +46,13 @@ export const PlayerTurn = () => {
           );
         })}
       </div>
-      {selected_card.value && (
-        <div className="prompt-response-to-send">
+      {selected_cards.value.length > 0 && (
+        <div className="selected-cards">
           <div>
-            Choose "<em>{selected_card.value}</em>"?
+            <SelectedCards selected_cards={selected_cards} />
           </div>
 
+          <button onClick={() => (selected_cards.value = [])}>Redo</button>
           <button>Send!</button>
         </div>
       )}
