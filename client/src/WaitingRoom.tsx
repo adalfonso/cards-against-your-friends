@@ -4,100 +4,39 @@ import { useContext } from "preact/hooks";
 import "./WaitingRoom.scss";
 import { AppContext } from "./AppState";
 import { api } from "./Api";
-import { connectWebSocket } from "./WebSocketClient";
-import { WebSocketClientEventType } from "../../common/types";
+import { Socket } from "./Socket";
+import { useBusy } from "./hooks/useBusy";
+
 export const WaitingRoom = () => {
-  const { connection, room_code, owner, nickname } = useContext(AppContext);
+  const { room_code, owner, nickname } = useContext(AppContext);
   const busy = useSignal(false);
   const nickname_input = useSignal("");
   const room_code_input = useSignal("");
+  const busyHandler = useBusy(busy);
 
-  const createGame = async () => {
-    if (busy.value) {
-      return;
-    }
-
-    busy.value = true;
-
-    try {
-      const game = await api.game.create.mutate();
+  const createOrJoinGame = (code?: string) =>
+    busyHandler(async () => {
+      const game = await (code
+        ? api.game.join.mutate({ room_code: code })
+        : api.game.create.mutate());
 
       room_code.value = game.room_code;
-      owner.value = true;
-      connection.value = connectWebSocket();
-    } catch (e) {
-      const message = "Failed to create game";
-      console.error(message, e);
-      alert(message);
-    } finally {
-      busy.value = false;
-    }
-  };
+      owner.value = !code;
+      Socket.init();
+    }, "Failed to create or join game");
 
-  const joinGame = async (value: string) => {
-    if (busy.value) {
-      return;
-    }
+  const submitNickname = (_nickname: string) =>
+    busyHandler(() => {
+      Socket.submitNickname(_nickname);
 
-    busy.value = true;
+      nickname.value = _nickname;
+    }, "Failed to submit your nickname");
 
-    try {
-      const game = await api.game.join.mutate({ room_code: value });
-
-      room_code.value = game.room_code;
-      connection.value = connectWebSocket();
-    } catch (e) {
-      const message = "Failed to join game";
-      console.error(message, e);
-      alert(message);
-    } finally {
-      busy.value = false;
-    }
-  };
-
-  const submitNickname = async (value: string) => {
-    if (busy.value || !connection.value) {
-      return;
-    }
-
-    busy.value = true;
-
-    try {
-      connection.value.send(
-        JSON.stringify({
-          event_type: WebSocketClientEventType.SetNickname,
-          data: value,
-        })
-      );
-
-      nickname.value = value;
-    } catch (e) {
-      // TODO: I don't think this error handling actually works for the websocket
-      const message = "Failed to submit your nickname";
-      console.error(message, e);
-      alert(message);
-    } finally {
-      busy.value = false;
-    }
-  };
-
-  const startGame = async () => {
-    if (busy.value || !connection.value) {
-      return;
-    }
-
-    busy.value = true;
-
-    try {
-      await api.game.start.mutate({ room_code: room_code.value });
-    } catch (e) {
-      const message = `Failed to start game: ${e.message}`;
-      console.error(message, e);
-      alert(message);
-    } finally {
-      busy.value = false;
-    }
-  };
+  const startGame = () =>
+    busyHandler(
+      () => api.game.start.mutate({ room_code: room_code.value }),
+      (e) => `Failed to start game: ${e.message}`
+    );
 
   return (
     <div id="waiting-room">
@@ -112,13 +51,13 @@ export const WaitingRoom = () => {
           />
           <button
             disabled={room_code_input.value.length !== 4}
-            onClick={() => joinGame(room_code_input.value)}
+            onClick={() => createOrJoinGame(room_code_input.value)}
           >
             JOIN
           </button>
           <p className="or">OR</p>
 
-          <button onClick={createGame}>CREATE GAME</button>
+          <button onClick={() => createOrJoinGame()}>CREATE GAME</button>
         </>
       )}
 
@@ -141,7 +80,7 @@ export const WaitingRoom = () => {
           </button>
 
           {owner.value && (
-            <button onClick={startGame} disabled={!nickname.value}>
+            <button onClick={() => startGame()} disabled={!nickname.value}>
               START GAME
             </button>
           )}
