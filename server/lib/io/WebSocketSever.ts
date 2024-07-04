@@ -1,11 +1,12 @@
 import { WebSocket, WebSocketServer } from "ws";
 import { WebSocketClientEvent } from "@common/types";
 import { identify, setNickname } from "./incoming";
+import { Game } from "../game/Game";
 
 // In-memory stores; convert to cache
 export const clients: Record<string, { ws: WebSocket }> = {};
 export const nicknames: Record<string, string> = {};
-export const games: Record<string, { players: Set<string> }> = {};
+export const games: Record<string, Game> = {};
 
 export const createWebSocketServer = () => {
   const wss = new WebSocketServer({ port: 4202 });

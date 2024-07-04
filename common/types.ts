@@ -8,6 +8,8 @@ export const WebSocketClientEvent = {
 export const WebSocketServerEvent = {
   InformIdentity: "INFORM_IDENTITY",
   StartGame: "START_GAME",
+  InitPrompter: "INIT_PROMPTER",
+  InitPromptee: "INIT_PROMPTEE",
 } as const;
 
 export type WebSocketServerEvent =

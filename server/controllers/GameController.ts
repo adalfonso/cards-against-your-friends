@@ -3,12 +3,13 @@ import { randomUUID } from "crypto";
 import { Request as ExpressReq, Response as ExpressRes } from "express";
 import { GameState } from "@prisma/client";
 
-import { clients, games, nicknames } from "@server/lib/io/WebSocketSever";
 import { Database } from "@server/lib/data/Database";
-import { roomCodePayloadSchema } from "@server/schema/GameSchema";
 import { Request } from "@server/trpc";
-import { sendGameUpdate } from "@server/lib/io/outgoing";
 import { WebSocketServerEvent } from "@common/types";
+import { clients, games, nicknames } from "@server/lib/io/WebSocketSever";
+import { roomCodePayloadSchema } from "@server/schema/GameSchema";
+import { sendGameUpdate } from "@server/lib/io/outgoing";
+import { Game } from "@server/lib/game/Game";
 
 export const GameController = {
   create: async ({ ctx: { req, res } }: Request) => {
@@ -42,16 +43,18 @@ export const GameController = {
     input,
   }: Request<typeof roomCodePayloadSchema>) => {
     const { room_code } = input;
-    const players = games[room_code]?.players;
 
-    if (players.size <= 1) {
+    const game_instance = games[room_code];
+    const { players } = game_instance;
+
+    if (players.length <= 1) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Cannot start game with a single player",
       });
     }
 
-    for (const player_id of players.values()) {
+    for (const player_id of players) {
       if (!nicknames[player_id]) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -59,10 +62,11 @@ export const GameController = {
         });
       }
 
-      if (!nicknames[player_id]) {
+      if (!clients[player_id]) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Not all players have chosen a nickname yet",
+          message:
+            "Some players joined but are no longer connected. Please restart game",
         });
       }
     }
@@ -89,6 +93,8 @@ export const GameController = {
     });
 
     sendGameUpdate(WebSocketServerEvent.StartGame, room_code);
+
+    game_instance.nextTurn();
   },
 };
 
@@ -109,10 +115,10 @@ const initUserId = (
   }
 
   if (!games[room_code]) {
-    games[room_code] = { players: new Set() };
+    games[room_code] = new Game(room_code);
   }
 
-  games[room_code].players.add(user_id);
+  games[room_code].addPlayer(user_id);
 
   return user_id;
 };

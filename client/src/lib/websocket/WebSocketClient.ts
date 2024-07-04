@@ -42,6 +42,12 @@ export const connectWebSocket = () => {
         return informIdentity(payload.data);
       case WebSocketServerEvent.StartGame:
         return (app_state.game_state.value = GameState.ACTIVE);
+
+      case WebSocketServerEvent.InitPrompter:
+        return (app_state.is_prompter.value = true);
+
+      case WebSocketServerEvent.InitPromptee:
+        return (app_state.is_prompter.value = false);
       default:
         console.error(
           "Received unknown websocket event type:",
