@@ -1,4 +1,4 @@
-import { Maybe, WebSocketClientEventType } from "../../common/types";
+import { Maybe, WebSocketClientEvent } from "../../../../common/types";
 import { connectWebSocket } from "./WebSocketClient";
 
 let _connection: Maybe<WebSocket> = null;
@@ -16,9 +16,9 @@ export class Socket {
   }
 
   static submitNickname(nickname: string) {
-    Socket?.connection.send(
+    Socket.connection.send(
       JSON.stringify({
-        event_type: WebSocketClientEventType.SetNickname,
+        event_type: WebSocketClientEvent.SetNickname,
         data: nickname,
       })
     );

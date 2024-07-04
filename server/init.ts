@@ -3,7 +3,7 @@ import express, { Express } from "express";
 import cookieParser from "cookie-parser";
 
 import { initRouter } from "@routes/router";
-import { createWebSocketServer } from "./WebSocketSever";
+import { createWebSocketServer } from "./lib/io/WebSocketSever";
 
 /**
  * Initialize the express app

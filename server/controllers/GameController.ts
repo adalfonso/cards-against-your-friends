@@ -3,10 +3,12 @@ import { randomUUID } from "crypto";
 import { Request as ExpressReq, Response as ExpressRes } from "express";
 import { GameState } from "@prisma/client";
 
-import { games, nicknames } from "@server/WebSocketSever";
+import { clients, games, nicknames } from "@server/lib/io/WebSocketSever";
 import { Database } from "@server/lib/data/Database";
 import { roomCodePayloadSchema } from "@server/schema/GameSchema";
 import { Request } from "@server/trpc";
+import { sendGameUpdate } from "@server/lib/io/outgoing";
+import { WebSocketServerEvent } from "@common/types";
 
 export const GameController = {
   create: async ({ ctx: { req, res } }: Request) => {
@@ -56,6 +58,13 @@ export const GameController = {
           message: "Not all players have chosen a nickname yet",
         });
       }
+
+      if (!nicknames[player_id]) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Not all players have chosen a nickname yet",
+        });
+      }
     }
 
     const game = await Database.instance().game.findUniqueOrThrow({
@@ -78,6 +87,8 @@ export const GameController = {
         state: GameState.ACTIVE,
       },
     });
+
+    sendGameUpdate(WebSocketServerEvent.StartGame, room_code);
   },
 };
 

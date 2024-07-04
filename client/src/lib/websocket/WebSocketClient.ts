@@ -1,8 +1,9 @@
+import { GameState } from "@prisma/client";
 import {
-  WebSocketClientEventType,
-  WebSocketServerEventType,
-} from "../../common/types";
-import { app_state } from "./AppState";
+  WebSocketClientEvent,
+  WebSocketServerEvent,
+} from "../../../../common/types";
+import { app_state } from "../../AppState";
 
 export const connectWebSocket = () => {
   const user_id = document.cookie.replace(
@@ -25,7 +26,7 @@ export const connectWebSocket = () => {
 
     ws.send(
       JSON.stringify({
-        event_type: WebSocketClientEventType.Identify,
+        event_type: WebSocketClientEvent.Identify,
         data: user_id,
       })
     );
@@ -37,8 +38,10 @@ export const connectWebSocket = () => {
     const payload = JSON.parse(event.data) ?? {};
 
     switch (payload.event_type) {
-      case WebSocketServerEventType.InformIdentity:
+      case WebSocketServerEvent.InformIdentity:
         return informIdentity(payload.data);
+      case WebSocketServerEvent.StartGame:
+        return (app_state.game_state.value = GameState.ACTIVE);
       default:
         console.error(
           "Received unknown websocket event type:",

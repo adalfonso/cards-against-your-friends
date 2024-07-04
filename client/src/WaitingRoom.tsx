@@ -4,7 +4,7 @@ import { useContext } from "preact/hooks";
 import "./WaitingRoom.scss";
 import { AppContext } from "./AppState";
 import { api } from "./Api";
-import { Socket } from "./Socket";
+import { Socket } from "./lib/websocket/Socket";
 import { useBusy } from "./hooks/useBusy";
 
 export const WaitingRoom = () => {
