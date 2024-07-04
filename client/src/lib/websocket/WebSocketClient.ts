@@ -40,14 +40,15 @@ export const connectWebSocket = () => {
     switch (payload.event_type) {
       case WebSocketServerEvent.InformIdentity:
         return informIdentity(payload.data);
+
       case WebSocketServerEvent.StartGame:
         return (app_state.game_state.value = GameState.ACTIVE);
 
       case WebSocketServerEvent.InitPrompter:
-        return (app_state.is_prompter.value = true);
+        return initPrompter(payload.data);
 
       case WebSocketServerEvent.InitPromptee:
-        return (app_state.is_prompter.value = false);
+        return initPromptee(payload.data);
       default:
         console.error(
           "Received unknown websocket event type:",
@@ -67,4 +68,15 @@ const informIdentity = ({
 }) => {
   // Set cached nickname if there is one
   app_state.nickname.value = nickname;
+};
+
+const initPrompter = ({ content }: { content: string }) => {
+  app_state.is_prompter.value = true;
+  app_state.prompt.value = content;
+};
+
+const initPromptee = ({ content }: { content: string[] }) => {
+  app_state.is_prompter.value = false;
+  app_state.prompt.value = "";
+  app_state.prompt_responses.value = content;
 };

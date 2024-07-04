@@ -40,7 +40,7 @@ npm run docker:dev
 - App served @ `http://localhost:4200`
 
 **Initial Startup**
-Game prompts and responses are ignored in the source. Must manually create `prompts` and `responses` exports as `Array<string>` for each at `server/content`
+Game prompts and prompt responses are ignored in the source. Must manually create `prompts` and `prompt_responses` exports as `Array<string>` for each at `server/content`
 
 ---
 

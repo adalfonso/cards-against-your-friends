@@ -2,11 +2,11 @@ import { Maybe } from "@common/types";
 import { clients } from "../io/WebSocketSever";
 import { initPromptee, initPrompter, startGame } from "../io/outgoing";
 
-import { prompts, responses } from "@server/content";
+import { prompts, prompt_responses } from "@server/content";
 
 type ContentStore = {
   prompts: Array<string>;
-  responses: Array<string>;
+  prompt_responses: Array<string>;
 };
 
 const card_hand_size = 7;
@@ -18,7 +18,7 @@ export class Game {
 
   private _recycling_bin: ContentStore = {
     prompts: [],
-    responses: [],
+    prompt_responses: [],
   };
 
   constructor(
@@ -26,7 +26,7 @@ export class Game {
     private _content: ContentStore
   ) {
     shuffle(this._content.prompts);
-    shuffle(this._content.responses);
+    shuffle(this._content.prompt_responses);
   }
 
   get players() {
@@ -34,7 +34,7 @@ export class Game {
   }
 
   public static create(room_code: string) {
-    return new Game(room_code, { prompts, responses });
+    return new Game(room_code, { prompts, prompt_responses: prompt_responses });
   }
 
   public addPlayer(user_id: string) {
@@ -85,9 +85,11 @@ export class Game {
 
     const content = new Array(card_hand_size)
       .fill(0)
-      .map(() => this._content.responses.pop() ?? "RAN OUT OF RESPONSES");
+      .map(
+        () => this._content.prompt_responses.pop() ?? "RAN OUT OF RESPONSES"
+      );
 
-    this._recycling_bin.responses.push(...content);
+    this._recycling_bin.prompt_responses.push(...content);
 
     initPromptee(connection.ws, content);
   }

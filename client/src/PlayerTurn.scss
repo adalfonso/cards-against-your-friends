@@ -1,0 +1,45 @@
+#player-turn {
+  .card-carousel {
+    display: flex;
+    overflow: auto;
+  }
+
+  .playing-card {
+    position: relative;
+    background-color: #fafafa;
+    border: 1px solid #1a1a1a;
+    border-radius: 0.5rem;
+    min-width: calc(100% - 2rem);
+    width: 100%;
+    margin: 0 1rem;
+    font-size: 1.75rem;
+    aspect-ratio: 2/3;
+
+    > div {
+      padding: 1.25rem 2rem;
+    }
+  }
+
+  .prompt-response-to-send {
+    font-size: 1.25rem;
+    margin: 3rem 1rem;
+    display: flex;
+    flex-direction: column;
+    > div {
+      margin-bottom: 3rem;
+    }
+
+    button {
+      display: block;
+    }
+  }
+
+  &.prompter {
+    .card-carousel {
+      .playing-card {
+        background-color: #1a1a1a;
+        color: #fafafa;
+      }
+    }
+  }
+}
