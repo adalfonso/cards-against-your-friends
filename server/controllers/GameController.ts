@@ -5,10 +5,8 @@ import { GameState } from "@prisma/client";
 
 import { Database } from "@server/lib/data/Database";
 import { Request } from "@server/trpc";
-import { WebSocketServerEvent } from "@common/types";
 import { clients, games, nicknames } from "@server/lib/io/WebSocketSever";
 import { roomCodePayloadSchema } from "@server/schema/GameSchema";
-import { sendGameUpdate } from "@server/lib/io/outgoing";
 import { Game } from "@server/lib/game/Game";
 
 export const GameController = {
@@ -92,9 +90,7 @@ export const GameController = {
       },
     });
 
-    sendGameUpdate(WebSocketServerEvent.StartGame, room_code);
-
-    game_instance.nextTurn();
+    game_instance.start();
   },
 };
 
@@ -115,7 +111,7 @@ const initUserId = (
   }
 
   if (!games[room_code]) {
-    games[room_code] = new Game(room_code);
+    games[room_code] = Game.create(room_code);
   }
 
   games[room_code].addPlayer(user_id);
