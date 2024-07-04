@@ -17,6 +17,13 @@ model Game {
   id         String    @id @default(auto()) @map("_id") @db.ObjectId
   room_code  String    @unique
   players    Json      @default("{}")
+  state      GameState @default(INIT)
   created_at DateTime  @default(now()) @db.Timestamp()
   created_by String
+}
+
+enum GameState {
+  INIT
+  ACTIVE
+  ENDED
 }
