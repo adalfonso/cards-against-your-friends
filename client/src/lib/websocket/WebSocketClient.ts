@@ -60,6 +60,9 @@ export const connectWebSocket = () => {
       case WebSocketServerEvent.AwardPrompt:
         return awardPrompt(payload.data);
 
+      case WebSocketServerEvent.EndGame:
+        return endGame(payload.data);
+
       default:
         console.error(
           "Received unknown websocket event type:",
@@ -72,6 +75,7 @@ export const connectWebSocket = () => {
 };
 
 const informIdentity = ({
+  user_id,
   nickname,
 }: {
   user_id: string;
@@ -79,6 +83,7 @@ const informIdentity = ({
 }) => {
   // Set cached nickname if there is one
   app_state.nickname.value = nickname;
+  app_state.user_id.value = user_id;
 };
 
 const initPrompter = ({
@@ -135,4 +140,9 @@ const awardPrompt = ({ prompt }: { prompt: string }) => {
     ...app_state.awarded_prompts.value,
     prompt,
   ];
+};
+
+const endGame = ({ winner }: { winner: string }) => {
+  app_state.winner.value = winner;
+  app_state.player_state.value = "ENDED";
 };

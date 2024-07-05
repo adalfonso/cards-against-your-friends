@@ -65,3 +65,12 @@ export const awardPrompt = (ws: WebSocket, prompt: string) => {
     })
   );
 };
+
+export const endGame = (ws: WebSocket, winner: string) => {
+  ws.send(
+    JSON.stringify({
+      event_type: WebSocketServerEvent.EndGame,
+      data: { winner },
+    })
+  );
+};

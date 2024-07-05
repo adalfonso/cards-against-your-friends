@@ -1,9 +1,10 @@
 import "./app.scss";
-import { WaitingRoom } from "./WaitingRoom";
-import { app_state, AppContext } from "./AppState";
+import { GameOver } from "./GameOver";
 import { PlayerTurn } from "./PlayerTurn";
 import { PrompterDeciding } from "./PrompterDeciding";
 import { Waiting } from "./Waiting";
+import { WaitingRoom } from "./WaitingRoom";
+import { app_state, AppContext } from "./AppState";
 import { useContext } from "preact/hooks";
 
 export function App() {
@@ -20,6 +21,8 @@ export function App() {
       {app_state.player_state.value === "PROMPTER_DECIDING" && (
         <PrompterDeciding />
       )}
+
+      {app_state.player_state.value === "ENDED" && <GameOver />}
     </>
   );
 }

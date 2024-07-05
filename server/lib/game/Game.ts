@@ -9,7 +9,11 @@ type ContentStore = {
   prompt_responses: Array<string>;
 };
 
+// Number of cards a player can have in their hand at one time
 const card_hand_size = 7;
+
+// Number of cards required to win
+const winning_count = 7;
 
 export class Game {
   public _players: Set<string> = new Set();
@@ -28,6 +32,8 @@ export class Game {
   private _received_prompt_responses: Record<string, Array<string>> = {};
 
   private _awarded_prompts: Record<string, Array<string>> = {};
+
+  private _game_over = false;
 
   constructor(
     private _room_code: string,
@@ -81,6 +87,10 @@ export class Game {
   }
 
   public nextTurn() {
+    if (this._game_over) {
+      return;
+    }
+
     this._received_prompt_responses = {};
     this._rotatePrompter();
 
@@ -122,6 +132,21 @@ export class Game {
     const connection = clients[player];
 
     outgoing.awardPrompt(connection.ws, prompt);
+
+    const winner = Object.entries(this._awarded_prompts).find(
+      ([_player, prompts]) => prompts.length === winning_count
+    );
+
+    if (winner) {
+      const [winning_player] = winner;
+      this._players.forEach((player) => {
+        const connection = clients[player];
+
+        outgoing.endGame(connection.ws, winning_player);
+      });
+
+      this._game_over = true;
+    }
   }
 
   private _getPrompt() {

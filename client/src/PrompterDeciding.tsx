@@ -14,11 +14,6 @@ export const PrompterDeciding = () => {
     () => responses_for_prompter.value[selected_card_id.value]
   );
 
-  const selectCard = (promptee: string) => () => {
-    console.log({ promptee });
-    return (selected_card_id.value = promptee);
-  };
-
   const awardPrompt = (player: string) => () => {
     Socket.sendAwardPrompt(room_code.value, player, prompt.value);
     award_sent.value = true;
@@ -33,7 +28,7 @@ export const PrompterDeciding = () => {
             return (
               <div
                 className="playing-card prompt-card"
-                onClick={selectCard(promptee)}
+                onClick={() => (selected_card_id.value = promptee)}
               >
                 <div className="card-text">
                   {mergeResponsesIntoPrompt(prompt.value, responses)}
