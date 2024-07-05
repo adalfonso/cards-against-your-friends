@@ -4,15 +4,14 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "pnpm prisma-generate && nodemon --watch './server' -e ts --exec 'node --loader @esbuild-kit/esm-loader ./server/index.dev.ts'",
-    "start": "pnpm build && node --loader @esbuild-kit/esm-loader ./server/index.ts",
+    "dev": "npx prisma generate && nodemon --watch './server' -e ts --exec 'node --loader @esbuild-kit/esm-loader ./server/index.dev.ts'",
+    "start": "npx prisma generate && pnpm build && node --loader @esbuild-kit/esm-loader ./server/index.ts",
     "build": "vite build",
     "docker": "docker-compose up --build",
     "docker:dev": "docker-compose -f docker-compose.dev.yml up --build",
     "docker:publish": "docker build -t adalfonso/cayf:latest . && docker push adalfonso/cayf:latest",
     "check": "tsc --noEmit && pnpm lint",
-    "lint": "eslint --quiet",
-    "prisma-generate": "npx prisma generate"
+    "lint": "eslint --quiet"
   },
   "dependencies": {
     "@preact/signals": "^1.2.3",
