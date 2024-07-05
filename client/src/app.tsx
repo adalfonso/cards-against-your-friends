@@ -1,5 +1,3 @@
-import _ from "lodash-es";
-
 import "./app.scss";
 import { WaitingRoom } from "./WaitingRoom";
 import { app_state } from "./AppState";

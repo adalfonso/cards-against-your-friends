@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "pnpm prisma-generate && nodemon --watch './server' -e ts --exec 'node --loader @esbuild-kit/esm-loader ./server/index.dev.ts'",
-    "build": "tsc -b && vite build",
+    "build": "vite build",
     "docker": "docker-compose up --build",
     "docker:dev": "docker-compose -f docker-compose.dev.yml up --build",
     "docker:publish": "docker build -t adalfonso/cayf:latest . && docker push adalfonso/cayf:latest",
@@ -18,13 +18,10 @@
     "@prisma/client": "^5.16.1",
     "@trpc/client": "^10.45.2",
     "@trpc/server": "^10.45.2",
-    "@types/express": "^4.17.21",
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "lodash-es": "^4.17.21",
     "preact": "^10.22.1",
-    "sass": "^1.77.6",
     "ws": "^8.18.0",
     "zod": "^3.23.8"
   },
@@ -32,7 +29,7 @@
     "@esbuild-kit/esm-loader": "^2.6.5",
     "@preact/preset-vite": "^2.8.3",
     "@types/cookie-parser": "^1.4.7",
-    "@types/lodash-es": "^4.17.12",
+    "@types/express": "^4.17.21",
     "@types/node": "^20.14.9",
     "@types/uuid": "^10.0.0",
     "@types/ws": "^8.5.10",
@@ -42,6 +39,7 @@
     "nodemon": "^3.1.4",
     "prettier": "^3.3.2",
     "prisma": "^5.16.1",
+    "sass": "^1.77.6",
     "typescript": "^5.5.3",
     "vite": "^5.3.3"
   }
