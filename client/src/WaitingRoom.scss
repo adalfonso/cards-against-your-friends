@@ -1,9 +1,13 @@
 #waiting-room {
-  padding-top: 2rem;
   display: flex;
+
   flex-direction: column;
   > * {
     margin: 0 0 1rem 0;
+  }
+
+  h2 {
+    margin-bottom: 2rem;
   }
 
   > p {

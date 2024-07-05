@@ -1,17 +1,15 @@
-import { Signal } from "@preact/signals";
-
 type SelectedCardsProps = {
-  selected_cards: Signal<Array<string>>;
+  selected_cards: Array<string>;
 };
 
 export const SelectedCards = ({ selected_cards }: SelectedCardsProps) => {
   return (
-    <div>
+    <div className="selected-cards-sentence">
       Choose{" "}
-      {selected_cards.value.map((value, index, arr) => {
+      {selected_cards.map((value, index, arr) => {
         return (
           <>
-            <strong>{clean(value)}</strong>
+            <strong>{removeTrailingPuntuation(value)}</strong>
             {getPunctuation(arr.length, index)}
           </>
         );
@@ -21,18 +19,16 @@ export const SelectedCards = ({ selected_cards }: SelectedCardsProps) => {
   );
 };
 
-const clean = (value: string) => {
+const removeTrailingPuntuation = (value: string) => {
   const pattern = /[.!]/;
 
-  if (pattern.test(value.charAt(value.length - 1))) {
-    return value.slice(0, -1);
-  }
-
-  return value;
+  return pattern.test(value.charAt(value.length - 1))
+    ? value.slice(0, -1)
+    : value;
 };
 
 const getPunctuation = (length: number, index: number) => {
-  // last response
+  // last prompt response
   if (index === length - 1) {
     return "";
   }

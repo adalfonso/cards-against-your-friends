@@ -74,3 +74,28 @@ export const receivePromptResponses = (
 
   game.receivePromptResponses(prompt_responses, user_id);
 };
+
+// Award a prompt card to a player
+export const awardPrompt = (
+  ws: WebSocket,
+  {
+    room_code,
+    player,
+    prompt,
+  }: { room_code: string; player: string; prompt: string }
+) => {
+  const user_id = getUserIdFromWebsocket(ws);
+
+  if (!user_id) {
+    return console.error("Could not find user_id to set nickname");
+  }
+
+  const game = games[room_code];
+
+  if (!game) {
+    return console.error("Could not find game for: " + room_code);
+  }
+
+  game.awardPrompt(player, prompt);
+  game.nextTurn();
+};

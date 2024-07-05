@@ -2,7 +2,10 @@ import { WebSocket } from "ws";
 
 import { WebSocketServerEvent } from "@common/types";
 
-export const initPrompter = (ws: WebSocket, content: string) => {
+export const initPrompter = (
+  ws: WebSocket,
+  content: { prompt: string; prompt_responses: Array<string> }
+) => {
   ws.send(
     JSON.stringify({
       event_type: WebSocketServerEvent.InitPrompter,
@@ -50,6 +53,15 @@ export const startGame = (ws: WebSocket) => {
     JSON.stringify({
       event_type: WebSocketServerEvent.StartGame,
       data: {},
+    })
+  );
+};
+
+export const awardPrompt = (ws: WebSocket, prompt: string) => {
+  ws.send(
+    JSON.stringify({
+      event_type: WebSocketServerEvent.AwardPrompt,
+      data: { prompt },
     })
   );
 };

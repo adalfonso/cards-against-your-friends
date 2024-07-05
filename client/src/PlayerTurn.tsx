@@ -1,8 +1,8 @@
 import { useContext } from "preact/hooks";
-
-import { AppContext } from "./AppState";
-import "./PlayerTurn.scss";
 import { useSignal } from "@preact/signals";
+
+import "./PlayerTurn.scss";
+import { AppContext } from "./AppState";
 import { SelectedCards } from "./PlayerTurn/SelectedCards";
 import { Socket } from "./lib/websocket/Socket";
 
@@ -13,7 +13,6 @@ export const PlayerTurn = () => {
     prompt,
     responses_for_promptee,
     prompt_response_count,
-    nickname,
     room_code,
   } = useContext(AppContext);
 
@@ -35,11 +34,13 @@ export const PlayerTurn = () => {
 
   const sendPromptResponses = () => {
     Socket.sendPromptResponses(room_code.value, selected_cards.value);
+    responses_for_promptee.value = responses_for_promptee.value.filter(
+      (response) => !selected_cards.value.includes(response)
+    );
   };
 
   return (
-    <div id="player-turn">
-      <h2>{nickname.value}</h2>
+    <div id="player-turn" className="card-view">
       <div className="card-carousel">
         {cards.map((text) => {
           const cleaned_text = clean(text);
@@ -55,7 +56,7 @@ export const PlayerTurn = () => {
                 selectCard(text);
               }}
             >
-              <div>{cleaned_text}</div>
+              <div className="card-text">{cleaned_text}</div>
 
               {selected && <div className="star">★</div>}
             </div>
@@ -64,9 +65,7 @@ export const PlayerTurn = () => {
       </div>
       {selected_cards.value.length > 0 && (
         <div className="selected-cards">
-          <div>
-            <SelectedCards selected_cards={selected_cards} />
-          </div>
+          <SelectedCards selected_cards={selected_cards.value} />
 
           <div className="buttons">
             <button onClick={() => (selected_cards.value = [])}>Redo</button>
@@ -85,10 +84,11 @@ export const PlayerTurn = () => {
   );
 };
 
+// Attaches punctuation and normalizes blank spaces
 const clean = (str: string) => {
   const punctuationRegex = /[.,;:?!]$/;
 
-  str = str.replace(/_+/, "______");
+  str = str.replace(/_+/g, "______");
 
   return punctuationRegex.test(str) ? str : str + ".";
 };

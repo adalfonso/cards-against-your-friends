@@ -1,6 +1,6 @@
 import { WebSocket, WebSocketServer } from "ws";
 import { WebSocketClientEvent } from "@common/types";
-import { identify, receivePromptResponses, setNickname } from "./incoming";
+import * as incoming from "./incomingWebSocketEvents";
 import { Game } from "../game/Game";
 
 // In-memory stores; convert to cache
@@ -20,13 +20,16 @@ export const createWebSocketServer = () => {
 
       switch (payload.event_type) {
         case WebSocketClientEvent.Identify:
-          return identify(ws, payload.data);
+          return incoming.identify(ws, payload.data);
 
         case WebSocketClientEvent.SetNickname:
-          return setNickname(ws, payload.data.nickname);
+          return incoming.setNickname(ws, payload.data.nickname);
 
         case WebSocketClientEvent.SendPromptResponses:
-          return receivePromptResponses(ws, payload.data);
+          return incoming.receivePromptResponses(ws, payload.data);
+
+        case WebSocketClientEvent.AwardPrompt:
+          return incoming.awardPrompt(ws, payload.data);
 
         default:
           console.error(

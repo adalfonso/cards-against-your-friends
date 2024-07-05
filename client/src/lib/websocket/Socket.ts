@@ -35,4 +35,13 @@ export class Socket {
       })
     );
   }
+
+  static sendAwardPrompt(room_code: string, player: string, prompt: string) {
+    Socket.connection.send(
+      JSON.stringify({
+        event_type: WebSocketClientEvent.AwardPrompt,
+        data: { room_code, player, prompt },
+      })
+    );
+  }
 }

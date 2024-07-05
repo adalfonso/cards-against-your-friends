@@ -40,7 +40,7 @@ export const WaitingRoom = () => {
 
   return (
     <div id="waiting-room">
-      <h2>Cards Against Your Friends</h2>
+      <h2>Cards Against the Commune</h2>
       {!room_code.value && (
         <>
           <input
@@ -67,6 +67,7 @@ export const WaitingRoom = () => {
           {nickname.value && <p>Nickname: {nickname.value}</p>}
           <input
             placeholder="Enter Nickname"
+            maxLength={16}
             value={nickname_input.value}
             onInput={(e) =>
               (nickname_input.value = e.currentTarget.value.toUpperCase())

@@ -56,6 +56,10 @@ export const connectWebSocket = () => {
 
       case WebSocketServerEvent.WaitForNextRound:
         return waitForNextRound();
+
+      case WebSocketServerEvent.AwardPrompt:
+        return awardPrompt(payload.data);
+
       default:
         console.error(
           "Received unknown websocket event type:",
@@ -77,9 +81,22 @@ const informIdentity = ({
   app_state.nickname.value = nickname;
 };
 
-const initPrompter = ({ content }: { content: string }) => {
+const initPrompter = ({
+  content,
+}: {
+  content: {
+    prompt: string;
+    prompt_responses: Array<string>;
+  };
+}) => {
   app_state.is_prompter.value = true;
-  app_state.prompt.value = content;
+  app_state.prompt.value = content.prompt;
+  app_state.responses_for_promptee.value = [
+    ...content.prompt_responses,
+    ...app_state.responses_for_promptee.value,
+  ];
+  app_state.responses_for_prompter.value = {};
+  app_state.player_state.value = "ACTIVE";
 };
 
 const initPromptee = ({
@@ -91,8 +108,13 @@ const initPromptee = ({
 }) => {
   app_state.is_prompter.value = false;
   app_state.prompt.value = "";
-  app_state.responses_for_promptee.value = content;
+  app_state.responses_for_promptee.value = [
+    ...content,
+    ...app_state.responses_for_promptee.value,
+  ];
   app_state.prompt_response_count.value = prompt_response_count;
+  app_state.responses_for_prompter.value = {};
+  app_state.player_state.value = "ACTIVE";
 };
 
 const deliverPromptResponses = ({
@@ -106,5 +128,11 @@ const deliverPromptResponses = ({
 
 const waitForNextRound = () => {
   app_state.player_state.value = "PROMPTEE_WAITING";
-  app_state.responses_for_promptee.value = [];
+};
+
+const awardPrompt = ({ prompt }: { prompt: string }) => {
+  app_state.awarded_prompts.value = [
+    ...app_state.awarded_prompts.value,
+    prompt,
+  ];
 };

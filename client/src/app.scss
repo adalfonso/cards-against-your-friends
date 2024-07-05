@@ -1,3 +1,9 @@
+@import url("https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap");
+* {
+  font-family: "Comfortaa", sans-serif;
+  line-height: 1.5rem;
+}
+
 html {
   height: 100%;
   width: 100%;
@@ -14,12 +20,25 @@ button,
 input {
   padding: 0.75rem;
   font-size: 1.25em;
+  border-radius: 0.25rem;
+  border: 1px solid #1a1a1a;
 }
 
 p {
   font-size: 1.25em;
 }
 
+$viewport-padding-x: 3rem;
+$viewport-padding-y: 2rem;
+
 #app {
-  padding: 1rem 2rem;
+  padding: $viewport-padding-y $viewport-padding-x;
+  height: calc(100% - $viewport-padding-y * 2);
+  width: calc(100% - $viewport-padding-x * 2);
+  display: flex;
+  flex-direction: column;
+
+  h2 {
+    margin-top: 0;
+  }
 }

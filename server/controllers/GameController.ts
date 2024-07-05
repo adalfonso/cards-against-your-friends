@@ -94,7 +94,7 @@ export const GameController = {
   },
 };
 
-const makeCode = (length: number, chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ") =>
+const makeCode = (length: number, chars = "ABCDEFGHIJKLMNOPRSTUVWXYZ") =>
   [...Array(length)]
     .map(() => chars.charAt(Math.floor(Math.random() * chars.length)))
     .join("");

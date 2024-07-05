@@ -1,12 +1,6 @@
 import { Maybe } from "@common/types";
 import { clients } from "../io/WebSocketServer";
-import {
-  deliverPromptResponses as deliverPromptResponsesToPrompter,
-  initPromptee,
-  initPrompter,
-  startGame,
-  waitForNextRound,
-} from "../io/outgoing";
+import * as outgoing from "../io/outgoingWebSocketEvents";
 
 import { prompts, prompt_responses } from "@server/content";
 
@@ -20,7 +14,11 @@ const card_hand_size = 7;
 export class Game {
   public _players: Set<string> = new Set();
 
+  private _previous_prompter: Maybe<string> = null;
   private _current_prompter: Maybe<string> = null;
+
+  private _previous_response_count = 0;
+  private _current_response_count = 0;
 
   private _recycling_bin: ContentStore = {
     prompts: [],
@@ -28,6 +26,8 @@ export class Game {
   };
 
   private _received_prompt_responses: Record<string, Array<string>> = {};
+
+  private _awarded_prompts: Record<string, Array<string>> = {};
 
   constructor(
     private _room_code: string,
@@ -39,6 +39,22 @@ export class Game {
 
   get players() {
     return [...this._players];
+  }
+
+  get prompter() {
+    const prompter = this.players.find(
+      (user_id) => user_id === this._current_prompter
+    );
+
+    if (!prompter) {
+      throw new Error(`Could not find prompter`);
+    }
+
+    return prompter;
+  }
+
+  get promptees() {
+    return this.players.filter((player) => player !== this.prompter);
   }
 
   public static create(room_code: string) {
@@ -59,7 +75,7 @@ export class Game {
       console.error("Player count and websocket count mismatch");
     }
 
-    players.forEach((player) => startGame(clients[player].ws));
+    players.forEach((player) => outgoing.startGame(clients[player].ws));
 
     this.nextTurn();
   }
@@ -68,71 +84,11 @@ export class Game {
     this._received_prompt_responses = {};
     this._rotatePrompter();
 
-    const prompt = this._nextTurnPrompter(this.prompter);
-    const prompt_response_count = countPrompts(prompt);
+    this._nextTurnPrompter(this.prompter);
 
     this.promptees.forEach((player) => {
-      this._nextTurnPromptee(player, prompt_response_count);
+      this._nextTurnPromptee(player);
     });
-  }
-
-  get prompter() {
-    const prompter = this.players.find(
-      (user_id) => user_id === this._current_prompter
-    );
-
-    if (!prompter) {
-      throw new Error(`Could not find prompter`);
-    }
-
-    return prompter;
-  }
-
-  get promptees() {
-    return this.players.filter((player) => player !== this.prompter);
-  }
-
-  private _nextTurnPrompter(player: string) {
-    const connection = clients[player];
-
-    const prompt = this._content.prompts.pop() ?? "RAN OUT OF PROMPTS";
-
-    this._recycling_bin.prompts.push(prompt);
-
-    initPrompter(connection.ws, prompt);
-
-    return prompt;
-  }
-
-  private _nextTurnPromptee(player: string, prompt_response_count: number) {
-    const connection = clients[player];
-
-    const prompt_responses = new Array(card_hand_size)
-      .fill(0)
-      .map(
-        () => this._content.prompt_responses.pop() ?? "RAN OUT OF RESPONSES"
-      );
-
-    this._recycling_bin.prompt_responses.push(...prompt_responses);
-
-    initPromptee(connection.ws, prompt_responses, prompt_response_count);
-  }
-
-  // Set the next player to be the prompter
-  private _rotatePrompter() {
-    const players = this.players.sort();
-    // Make first prompter random by sorting user_ids
-    if (this._current_prompter === null) {
-      this._current_prompter = players[0];
-    } else {
-      const current_prompter_index = players.indexOf(this._current_prompter);
-
-      if (current_prompter_index === players.length - 1) {
-        this._current_prompter = players[0];
-      } else {
-        this._current_prompter = players[current_prompter_index + 1];
-      }
-    }
   }
 
   public receivePromptResponses(
@@ -146,14 +102,99 @@ export class Game {
       this._players.size - 1;
 
     if (received_all_prompt_responses) {
-      deliverPromptResponsesToPrompter(
+      outgoing.deliverPromptResponses(
         clients[this.prompter].ws,
         this._received_prompt_responses
       );
 
       this.promptees.forEach((player) => {
-        waitForNextRound(clients[player].ws);
+        outgoing.waitForNextRound(clients[player].ws);
       });
+    }
+  }
+
+  public awardPrompt(player: string, prompt: string) {
+    if (!this._awarded_prompts[player]) {
+      this._awarded_prompts[player] = [];
+    }
+
+    this._awarded_prompts[player].push(prompt);
+    const connection = clients[player];
+
+    outgoing.awardPrompt(connection.ws, prompt);
+  }
+
+  private _getPrompt() {
+    return this._content.prompts.pop() ?? "RAN OUT OF PROMPTS";
+  }
+
+  private _getPromptResponse() {
+    return this._content.prompt_responses.pop() ?? "RAN OUT OF RESPONSES";
+  }
+
+  private _getPromptResponseCount(player: string) {
+    if (this._previous_response_count === 0) {
+      return card_hand_size;
+    }
+
+    if (player === this._previous_prompter) {
+      return 0;
+    }
+
+    this._previous_response_count;
+  }
+
+  private _nextTurnPrompter(player: string) {
+    const connection = clients[player];
+    const prompt = this._getPrompt();
+
+    this._previous_response_count = this._current_response_count;
+    this._current_response_count = countPrompts(prompt);
+
+    const prompt_responses = new Array(this._getPromptResponseCount(player))
+      .fill(0)
+      .map(this._getPromptResponse.bind(this));
+
+    this._recycling_bin.prompts.push(prompt);
+    this._recycling_bin.prompt_responses.push(...prompt_responses);
+
+    outgoing.initPrompter(connection.ws, { prompt, prompt_responses });
+
+    return prompt;
+  }
+
+  private _nextTurnPromptee(player: string) {
+    const connection = clients[player];
+    const prompt_responses = new Array(this._getPromptResponseCount(player))
+      .fill(0)
+      .map(this._getPromptResponse.bind(this));
+
+    this._recycling_bin.prompt_responses.push(...prompt_responses);
+
+    outgoing.initPromptee(
+      connection.ws,
+      prompt_responses,
+      this._current_response_count
+    );
+  }
+
+  // Set the next player to be the prompter
+  private _rotatePrompter() {
+    this._previous_prompter = this._current_prompter;
+
+    const players = this.players.sort();
+
+    // Make first prompter random by sorting user_ids
+    if (this._current_prompter === null) {
+      this._current_prompter = players[0];
+    } else {
+      const current_prompter_index = players.indexOf(this._current_prompter);
+
+      if (current_prompter_index === players.length - 1) {
+        this._current_prompter = players[0];
+      } else {
+        this._current_prompter = players[current_prompter_index + 1];
+      }
     }
   }
 }
