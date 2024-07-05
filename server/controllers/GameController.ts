@@ -1,7 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { randomUUID } from "crypto";
 import { Request as ExpressReq, Response as ExpressRes } from "express";
-import { GameState } from "@prisma/client";
 
 import { Database } from "@server/lib/data/Database";
 import { Request } from "@server/trpc";
@@ -86,7 +85,7 @@ export const GameController = {
         players: Object.fromEntries(
           [...players].map((user_id) => [user_id, nicknames[user_id]])
         ),
-        state: GameState.ACTIVE,
+        state: "ACTIVE",
       },
     });
 

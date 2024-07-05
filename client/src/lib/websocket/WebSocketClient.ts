@@ -1,5 +1,3 @@
-import { GameState } from "@prisma/client";
-
 import {
   WebSocketClientEvent,
   WebSocketServerEvent,
@@ -43,7 +41,7 @@ export const connectWebSocket = () => {
         return informIdentity(payload.data);
 
       case WebSocketServerEvent.StartGame:
-        return (app_state.player_state.value = GameState.ACTIVE);
+        return (app_state.player_state.value = "ACTIVE");
 
       case WebSocketServerEvent.InitPrompter:
         return initPrompter(payload.data);

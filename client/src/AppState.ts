@@ -1,8 +1,12 @@
 import { signal } from "@preact/signals";
-import { GameState } from "@prisma/client";
 import { createContext } from "preact";
 
-type PlayerState = GameState | "PROMPTER_DECIDING" | "PROMPTEE_WAITING";
+type PlayerState =
+  | "INIT"
+  | "ACTIVE"
+  | "ENDED"
+  | "PROMPTER_DECIDING"
+  | "PROMPTEE_WAITING";
 
 const awarded_prompts = signal<Array<string>>([]);
 const is_prompter = signal(false);

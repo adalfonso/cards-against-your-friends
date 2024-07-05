@@ -2,7 +2,10 @@ import { Maybe } from "@common/types";
 import { clients } from "../io/WebSocketServer";
 import * as outgoing from "../io/outgoingWebSocketEvents";
 
-import { prompts, prompt_responses } from "@server/content";
+// import { prompts, prompt_responses } from "@server/content";
+
+const prompts: Array<string> = [];
+const prompt_responses: Array<string> = [];
 
 type ContentStore = {
   prompts: Array<string>;
