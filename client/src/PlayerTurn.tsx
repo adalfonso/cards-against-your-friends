@@ -38,7 +38,7 @@ export const PlayerTurn = () => {
   };
 
   return (
-    <div id="player-turn" className={is_prompter.value ? "prompter" : ""}>
+    <div id="player-turn">
       <h2>{nickname.value}</h2>
       <div className="card-carousel">
         {cards.map((text) => {
@@ -48,7 +48,9 @@ export const PlayerTurn = () => {
             !is_prompter.value && selected_cards.value.includes(text);
           return (
             <div
-              className="playing-card"
+              className={
+                is_prompter.value ? "playing-card prompt-card" : "playing-card"
+              }
               onClick={() => {
                 selectCard(text);
               }}
