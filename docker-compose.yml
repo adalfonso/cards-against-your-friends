@@ -3,7 +3,7 @@ version: "3.8"
 services:
   app:
     container_name: cayf-app
-    image: TODO
+    image: adalfonso/cayf
     restart: unless-stopped
     ports:
       - 4201:4201
@@ -19,7 +19,7 @@ services:
 
   mongo:
     container_name: cayf-database
-    image: mongo:5.0
+    image: mongo:6.0
     restart: unless-stopped
     ports:
       - 27017:27017
