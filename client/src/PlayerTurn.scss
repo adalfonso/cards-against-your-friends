@@ -86,13 +86,15 @@
 }
 
 .star {
-  color: gold;
-
-  text-shadow: 1px 1px 1px #1a1a1a;
+  color: #1a1a1a;
   font-size: 3rem;
-  text-shadow:
-    -1px -1px 0 #1a1a1a,
-    1px -1px 0 #1a1a1a,
-    -1px 1px 0 #1a1a1a,
-    1px 1px 0 #1a1a1a;
+  margin-bottom: -0.75rem;
+  margin-right: -0.25rem;
+
+  &::before {
+    content: "\2605";
+    color: gold;
+    font-size: 3rem;
+    position: absolute;
+  }
 }

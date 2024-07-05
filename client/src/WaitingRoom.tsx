@@ -64,21 +64,30 @@ export const WaitingRoom = () => {
       {room_code.value && (
         <>
           <p>Room Code: {room_code.value}</p>
-          {nickname.value && <p>Nickname: {nickname.value}</p>}
-          <input
-            placeholder="Enter Nickname"
-            maxLength={16}
-            value={nickname_input.value}
-            onInput={(e) =>
-              (nickname_input.value = e.currentTarget.value.toUpperCase())
-            }
-          />
-          <button
-            disabled={!nickname_input.value.length}
-            onClick={() => submitNickname(nickname_input.value)}
-          >
-            SUBMIT
-          </button>
+          {nickname.value && (
+            <p>
+              Nickname: {nickname.value} <span></span>
+            </p>
+          )}
+
+          {!nickname.value && (
+            <>
+              <input
+                placeholder="Enter Nickname"
+                maxLength={16}
+                value={nickname_input.value}
+                onInput={(e) =>
+                  (nickname_input.value = e.currentTarget.value.toUpperCase())
+                }
+              />
+              <button
+                disabled={!nickname_input.value.length}
+                onClick={() => submitNickname(nickname_input.value)}
+              >
+                SUBMIT
+              </button>
+            </>
+          )}
 
           {owner.value && (
             <button onClick={() => startGame()} disabled={!nickname.value}>
