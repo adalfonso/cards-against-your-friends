@@ -63,18 +63,14 @@ export const WaitingRoom = () => {
 
       {room_code.value && (
         <>
-          <p>Room Code: {room_code.value}</p>
-          {nickname.value && (
-            <p>
-              Nickname: {nickname.value} <span></span>
-            </p>
-          )}
+          <div className="room-code">{room_code.value}</div>
+          {nickname.value && <div className="nickname">{nickname.value}</div>}
 
           {!nickname.value && (
             <>
               <input
                 placeholder="Enter Nickname"
-                maxLength={16}
+                maxLength={12}
                 value={nickname_input.value}
                 onInput={(e) =>
                   (nickname_input.value = e.currentTarget.value.toUpperCase())
@@ -90,9 +86,17 @@ export const WaitingRoom = () => {
           )}
 
           {owner.value && (
-            <button onClick={() => startGame()} disabled={!nickname.value}>
+            <button
+              className="start-game-button"
+              onClick={() => startGame()}
+              disabled={!nickname.value}
+            >
               START GAME
             </button>
+          )}
+
+          {!owner.value && nickname.value.length > 0 && (
+            <p>Waiting for game owner to start...</p>
           )}
         </>
       )}

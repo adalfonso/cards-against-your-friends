@@ -6,6 +6,7 @@ import { Waiting } from "./Waiting";
 import { WaitingRoom } from "./WaitingRoom";
 import { app_state, AppContext } from "./AppState";
 import { useContext } from "preact/hooks";
+import { GameHeader } from "./GameHeader";
 
 export function App() {
   const { nickname } = useContext(AppContext);
@@ -13,7 +14,7 @@ export function App() {
   return (
     <>
       {app_state.player_state.value !== "INIT" && nickname.value && (
-        <h2>{nickname.value}</h2>
+        <GameHeader />
       )}
       {app_state.player_state.value === "INIT" && <WaitingRoom />}
       {app_state.player_state.value === "ACTIVE" && <PlayerTurn />}
