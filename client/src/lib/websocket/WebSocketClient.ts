@@ -18,7 +18,7 @@ export const connectWebSocket = () => {
     return null;
   }
 
-  const ws = new WebSocket("ws://localhost:4202");
+  const ws = new WebSocket(`ws://${window.location.host}`);
 
   ws.onopen = (event) => {
     console.info("Connected to websocket", { event });

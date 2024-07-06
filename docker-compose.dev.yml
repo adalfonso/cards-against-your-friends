@@ -5,8 +5,6 @@ services:
     ports:
       # node server port
       - 4201:4201
-      # web socket port
-      - 4202:4202
       # node debug port
       - 9229:9229
       - 24678:24678

@@ -9,9 +9,9 @@ export const nicknames: Record<string, string> = {};
 export const games: Record<string, Game> = {};
 
 export const createWebSocketServer = () => {
-  const wss = new WebSocketServer({ port: 4202 });
+  const wss = new WebSocketServer({ noServer: true });
 
-  wss.on("connection", async (ws) => {
+  wss.on("connection", (ws) => {
     ws.on("error", console.error);
 
     ws.on("message", (event) => {
@@ -39,4 +39,6 @@ export const createWebSocketServer = () => {
       }
     });
   });
+
+  return wss;
 };

@@ -19,14 +19,13 @@ export const init = async (app: Express) => {
   app.use(cookieParser());
 
   initRouter(app);
-  createWebSocketServer();
+  const wss = createWebSocketServer();
 
-  return env;
+  return { env, wss };
 };
 
 // List of required env vars
 const required_vars = [
-  "APP_PORT",
   "HOST",
   "DATABASE_URL",
   "NODE_ENV",
@@ -35,7 +34,6 @@ const required_vars = [
 ] as const;
 
 const defaults: Record<string, string> = {
-  APP_PORT: "4200",
   NODE_ENV: "development",
   NODE_PORT: "4201",
   SOURCE_DIR: "dist/client",

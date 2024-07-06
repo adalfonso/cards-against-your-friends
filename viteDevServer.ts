@@ -1,14 +1,15 @@
 import express, { Express } from "express";
 import fs from "fs";
 import path from "path";
+import { Server as WebSocketServer } from "ws";
 import { createServer as createViteServer } from "vite";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 interface ConfigOptions {
-  port?: number;
-  initializer?: (app: Express) => Promise<unknown>;
+  port: number;
+  initializer: (app: Express) => Promise<{ wss: WebSocketServer }>;
 }
 
 /**
@@ -32,9 +33,7 @@ export async function createServer(options: ConfigOptions) {
 
   app.use(vite.middlewares);
 
-  if (initializer) {
-    initializer(app);
-  }
+  const { wss } = await initializer(app);
 
   app.use("*", async (req, res, next) => {
     const url = req.originalUrl;
@@ -54,7 +53,13 @@ export async function createServer(options: ConfigOptions) {
     }
   });
 
-  app.listen(port);
+  const server = app.listen(port, () =>
+    console.info(`Dev server listening on http://localhost:${port}`)
+  );
 
-  console.info(`App listening on http://localhost:${port}`);
+  server.on("upgrade", (req, socket, head) =>
+    wss.handleUpgrade(req, socket, head, (ws) =>
+      wss.emit("connection", ws, req)
+    )
+  );
 }
