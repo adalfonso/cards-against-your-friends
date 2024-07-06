@@ -1,9 +1,16 @@
 import dotenv from "dotenv";
 import express, { Express } from "express";
+import session from "express-session";
 import cookieParser from "cookie-parser";
 
 import { initRouter } from "@routes/router";
 import { createWebSocketServer } from "./lib/io/WebSocketServer";
+
+declare module "express-session" {
+  interface Session {
+    user_id: string;
+  }
+}
 
 /**
  * Initialize the express app
@@ -14,6 +21,13 @@ import { createWebSocketServer } from "./lib/io/WebSocketServer";
 export const init = async (app: Express) => {
   const env = initEnvVars();
 
+  const sessionParser = session({
+    saveUninitialized: false,
+    secret: env.APP_KEY,
+    resave: false,
+  });
+
+  app.use(sessionParser);
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(cookieParser());
@@ -21,7 +35,7 @@ export const init = async (app: Express) => {
   initRouter(app);
   const wss = createWebSocketServer();
 
-  return { env, wss };
+  return { env, wss, sessionParser };
 };
 
 // List of required env vars
@@ -31,6 +45,7 @@ const required_vars = [
   "NODE_ENV",
   "NODE_PORT",
   "SOURCE_DIR",
+  "APP_KEY",
 ] as const;
 
 const defaults: Record<string, string> = {

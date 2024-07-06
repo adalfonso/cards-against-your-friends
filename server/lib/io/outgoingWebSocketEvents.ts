@@ -1,6 +1,7 @@
 import { WebSocket } from "ws";
 
 import { WebSocketServerEvent } from "@common/types";
+import { nicknames } from "./WebSocketServer";
 
 export const initPrompter = (
   ws: WebSocket,
@@ -10,6 +11,17 @@ export const initPrompter = (
     JSON.stringify({
       event_type: WebSocketServerEvent.InitPrompter,
       data: { content },
+    })
+  );
+};
+
+export const informIdentity = (ws: WebSocket, user_id: string) => {
+  ws.send(
+    JSON.stringify({
+      event_type: WebSocketServerEvent.InformIdentity,
+      data: {
+        nickname: nicknames.get(user_id) ?? "",
+      },
     })
   );
 };
@@ -66,7 +78,7 @@ export const awardPrompt = (ws: WebSocket, prompt: string) => {
   );
 };
 
-export const endGame = (ws: WebSocket, winner: string) => {
+export const endGame = (ws: WebSocket, winner: boolean) => {
   ws.send(
     JSON.stringify({
       event_type: WebSocketServerEvent.EndGame,

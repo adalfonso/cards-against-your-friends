@@ -16,13 +16,14 @@ export const WaitingRoom = () => {
 
   const createOrJoinGame = (code?: string) =>
     busyHandler(async () => {
+      await api.game.startSession.mutate();
+      await Socket.init();
       const game = await (code
         ? api.game.join.mutate({ room_code: code })
         : api.game.create.mutate());
 
       room_code.value = game.room_code;
       owner.value = !code;
-      Socket.init();
     }, "Failed to create or join game");
 
   const submitNickname = (_nickname: string) =>

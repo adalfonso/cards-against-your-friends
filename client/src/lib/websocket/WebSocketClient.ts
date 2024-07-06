@@ -4,29 +4,17 @@ import {
 } from "../../../../common/types";
 import { app_state } from "../../AppState";
 
-export const connectWebSocket = () => {
-  const user_id = document.cookie.replace(
-    /(?:(?:^|.*;\s*)user_id\s*\=\s*([^;]*).*$)|^.*$/,
-    "$1"
-  );
-
-  if (!user_id) {
-    console.error(
-      "Failed to establish websocket connection: user_id header unable to be sent"
-    );
-
-    return null;
-  }
-
+export const connectWebSocket = (onSuccess: (ws: WebSocket) => void) => {
   const ws = new WebSocket(`ws://${window.location.host}`);
 
   ws.onopen = (event) => {
     console.info("Connected to websocket", { event });
+    onSuccess(ws);
 
     ws.send(
       JSON.stringify({
         event_type: WebSocketClientEvent.Identify,
-        data: user_id,
+        data: {},
       })
     );
   };
@@ -72,16 +60,9 @@ export const connectWebSocket = () => {
   return ws;
 };
 
-const informIdentity = ({
-  user_id,
-  nickname,
-}: {
-  user_id: string;
-  nickname: string;
-}) => {
+const informIdentity = ({ nickname }: { nickname: string }) => {
   // Set cached nickname if there is one
   app_state.nickname.value = nickname;
-  app_state.user_id.value = user_id;
 };
 
 const initPrompter = ({

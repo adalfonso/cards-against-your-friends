@@ -3,8 +3,16 @@ import { connectWebSocket } from "./WebSocketClient";
 
 let _connection: Maybe<WebSocket> = null;
 export class Socket {
-  static init() {
-    _connection = connectWebSocket();
+  static async init() {
+    if (_connection?.readyState === 1) {
+      return _connection;
+    }
+
+    return new Promise((resolve, reject) => {
+      _connection = connectWebSocket(resolve);
+
+      setTimeout(reject, 5000);
+    });
   }
 
   static get connection() {

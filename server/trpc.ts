@@ -10,7 +10,7 @@ export const createContext = ({
 }: trpcExpress.CreateExpressContextOptions) => ({ req, res });
 
 type Context = inferAsyncReturnType<typeof createContext> & {
-  user_id?: string;
+  user_id: string;
 };
 
 const t = initTRPC.context<Context>().create();
@@ -21,13 +21,13 @@ export const authenticatedProcedure = publicProcedure.use(async (opts) => {
   const {
     ctx: { req },
   } = opts;
-  if (!isValidUUIDv4(req.cookies.user_id)) {
+
+  if (!isValidUUIDv4(req.session.user_id)) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
+
   return opts.next({
-    ctx: {
-      user_id: req.cookies.user_id,
-    },
+    ctx: { user_id: req.session.user_id },
   });
 });
 

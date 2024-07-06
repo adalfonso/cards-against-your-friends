@@ -1,4 +1,4 @@
-import express, { Express } from "express";
+import express, { Express, Request, RequestHandler } from "express";
 import fs from "fs";
 import path from "path";
 import { Server as WebSocketServer } from "ws";
@@ -9,7 +9,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 interface ConfigOptions {
   port: number;
-  initializer: (app: Express) => Promise<{ wss: WebSocketServer }>;
+  initializer: (app: Express) => Promise<{
+    wss: WebSocketServer;
+    sessionParser: RequestHandler;
+  }>;
 }
 
 /**
@@ -33,7 +36,7 @@ export async function createServer(options: ConfigOptions) {
 
   app.use(vite.middlewares);
 
-  const { wss } = await initializer(app);
+  const { wss, sessionParser } = await initializer(app);
 
   app.use("*", async (req, res, next) => {
     const url = req.originalUrl;
@@ -57,9 +60,25 @@ export async function createServer(options: ConfigOptions) {
     console.info(`Dev server listening on http://localhost:${port}`)
   );
 
-  server.on("upgrade", (req, socket, head) =>
-    wss.handleUpgrade(req, socket, head, (ws) =>
-      wss.emit("connection", ws, req)
-    )
-  );
+  server.on("upgrade", (req: Request, socket, head) => {
+    socket.on("error", console.error);
+
+    console.info("Parsing session from request...");
+
+    sessionParser(req, {} as any, () => {
+      if (!req.session.user_id) {
+        socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
+        socket.destroy();
+        return;
+      }
+
+      console.info("Session is parsed!");
+
+      socket.removeListener("error", console.error);
+
+      wss.handleUpgrade(req, socket, head, (ws) => {
+        wss.emit("connection", ws, req);
+      });
+    });
+  });
 }

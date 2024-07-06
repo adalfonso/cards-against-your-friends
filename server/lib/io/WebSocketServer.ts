@@ -1,17 +1,23 @@
 import { WebSocket, WebSocketServer } from "ws";
+import { Request } from "express";
+
 import { WebSocketClientEvent } from "@common/types";
 import * as incoming from "./incomingWebSocketEvents";
 import { Game } from "../game/Game";
 
-// In-memory stores; convert to cache
-export const clients: Record<string, { ws: WebSocket }> = {};
-export const nicknames: Record<string, string> = {};
-export const games: Record<string, Game> = {};
+// In-memory stores; convert to cache maybe
+export const clients = new Map<string, WebSocket>();
+export const nicknames = new Map<string, string>();
+export const games = new Map<string, Game>();
 
 export const createWebSocketServer = () => {
   const wss = new WebSocketServer({ noServer: true });
 
-  wss.on("connection", (ws) => {
+  wss.on("connection", (ws, request: Request) => {
+    const user_id = request.session.user_id;
+
+    clients.set(user_id, ws);
+
     ws.on("error", console.error);
 
     ws.on("message", (event) => {
@@ -20,16 +26,16 @@ export const createWebSocketServer = () => {
 
       switch (payload.event_type) {
         case WebSocketClientEvent.Identify:
-          return incoming.identify(ws, payload.data);
+          return incoming.identify(ws, user_id);
 
         case WebSocketClientEvent.SetNickname:
-          return incoming.setNickname(ws, payload.data.nickname);
+          return incoming.setNickname(user_id, payload.data.nickname);
 
         case WebSocketClientEvent.SendPromptResponses:
-          return incoming.receivePromptResponses(ws, payload.data);
+          return incoming.receivePromptResponses(user_id, payload.data);
 
         case WebSocketClientEvent.AwardPrompt:
-          return incoming.awardPrompt(ws, payload.data);
+          return incoming.awardPrompt(payload.data);
 
         default:
           console.error(

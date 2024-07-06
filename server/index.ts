@@ -1,8 +1,9 @@
-import express from "express";
+import express, { Request } from "express";
+
 import { init } from "./init";
 (async () => {
   const app = express();
-  const { env, wss } = await init(app);
+  const { env, wss, sessionParser } = await init(app);
 
   // Must run after history fallback
   app.use(express.static(env.SOURCE_DIR));
@@ -13,9 +14,25 @@ import { init } from "./init";
     console.info(`Serving content from ${env.SOURCE_DIR}`);
   });
 
-  server.on("upgrade", (req, socket, head) =>
-    wss.handleUpgrade(req, socket, head, (ws) =>
-      wss.emit("connection", ws, req)
-    )
-  );
+  server.on("upgrade", (req: Request, socket, head) => {
+    socket.on("error", console.error);
+
+    console.info("Parsing session from request...");
+
+    sessionParser(req, {} as any, () => {
+      if (!req.session.user_id) {
+        socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
+        socket.destroy();
+        return;
+      }
+
+      console.info("Session is parsed!");
+
+      socket.removeListener("error", console.error);
+
+      wss.handleUpgrade(req, socket, head, (ws) => {
+        wss.emit("connection", ws, req);
+      });
+    });
+  });
 })();
