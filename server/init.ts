@@ -46,6 +46,7 @@ const required_vars = [
   "NODE_PORT",
   "SOURCE_DIR",
   "APP_KEY",
+  ...(process.env.NODE_ENV === "production" ? ["SSL_PATH"] : []),
 ] as const;
 
 const defaults: Record<string, string> = {

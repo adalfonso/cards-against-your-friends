@@ -5,7 +5,10 @@ import {
 import { app_state } from "../../AppState";
 
 export const connectWebSocket = (onSuccess: (ws: WebSocket) => void) => {
-  const ws = new WebSocket(`ws://${window.location.host}`);
+  const host = window.location.host;
+  const protocol = /^localhost:/.test(host) ? "wss" : "wss";
+
+  const ws = new WebSocket(`${protocol}://${host}/ws`);
 
   ws.onopen = (event) => {
     console.info("Connected to websocket", { event });

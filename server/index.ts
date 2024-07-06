@@ -1,15 +1,22 @@
 import express, { Request } from "express";
+import fs from "node:fs";
+import https from "node:https";
 
 import { init } from "./init";
 (async () => {
   const app = express();
   const { env, wss, sessionParser } = await init(app);
 
+  const options = {
+    key: fs.readFileSync(`${env.SSL_PATH}/cayf.key`),
+    cert: fs.readFileSync(`${env.SSL_PATH}/cayf.crt`),
+  };
+
   // Must run after history fallback
   app.use(express.static(env.SOURCE_DIR));
 
   // Start server
-  const server = app.listen(env.NODE_PORT, () => {
+  const server = https.createServer(options, app).listen(env.NODE_PORT, () => {
     console.info(`Server started: ${env.HOST}:${env.NODE_PORT}`);
     console.info(`Serving content from ${env.SOURCE_DIR}`);
   });

@@ -12,7 +12,13 @@ services:
     volumes:
       # Map work dir paths to (shared) named volumes
       - public_html:/usr/src/app/dist/client
-      - nginx_config:/usr/src/app/nginx
+
+      # Where prompt and prompt_response content goes
+      - /path/to/content/json:/src/app/server/content/content.json
+
+      # Certs for wss
+      - /path/to/cayf/certs/cayf.crt:/etc/ssl/cayf.crt
+      - /path/to/cayf/certs/cayf.key:/etc/ssl/cayf.key
     depends_on:
       - mongo
 
@@ -36,24 +42,7 @@ services:
       - mongodb:/data/db
       - mongodb_config:/data/configdb
 
-  nginx:
-    container_name: cayf-gateway
-    image: nginx:mainline-alpine
-    restart: unless-stopped
-    ports:
-      - 4200:4200
-    volumes:
-      - nginx_config:/etc/nginx/conf.d
-      - public_html:/var/www/html:ro
-
-      # TODO: Provide paths to SSL cert and key
-      - /path/to/cayf/certs/cayf.crt:/etc/ssl/cayf.crt
-      - /path/to/cayf/certs/cayf.key:/etc/ssl/cayf.key
-    depends_on:
-      - app
-
 volumes:
   mongodb:
   mongodb_config:
   public_html:
-  nginx_config:

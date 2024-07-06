@@ -11,7 +11,7 @@ export const nicknames = new Map<string, string>();
 export const games = new Map<string, Game>();
 
 export const createWebSocketServer = () => {
-  const wss = new WebSocketServer({ noServer: true });
+  const wss = new WebSocketServer({ noServer: true, path: "/ws" });
 
   wss.on("connection", (ws, request: Request) => {
     const user_id = request.session.user_id;

@@ -5,7 +5,9 @@ import { Request } from "@server/trpc";
 import { clients, games, nicknames } from "@server/lib/io/WebSocketServer";
 import { roomCodePayloadSchema } from "@server/schema/GameSchema";
 import { Game } from "@server/lib/game/Game";
-import { prompt_responses, prompts } from "@server/content";
+import content from "@server/content/content.json";
+
+const { prompts, prompt_responses } = content;
 
 export const GameController = {
   create: async ({ ctx: { user_id } }: Request) => {
