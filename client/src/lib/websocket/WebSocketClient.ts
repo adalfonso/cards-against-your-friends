@@ -6,7 +6,7 @@ import { app_state } from "../../AppState";
 
 export const connectWebSocket = (onSuccess: (ws: WebSocket) => void) => {
   const host = window.location.host;
-  const protocol = /^localhost:/.test(host) ? "ws" : "wss";
+  const protocol = window.location.protocol === "http:" ? "ws" : "wss";
 
   const ws = new WebSocket(`${protocol}://${host}/ws`);
 
