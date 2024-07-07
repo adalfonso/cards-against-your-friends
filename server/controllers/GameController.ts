@@ -19,7 +19,7 @@ export const GameController = {
       data: { room_code, created_by: user_id },
     });
 
-    const game = Game.create(room_code, { prompts, prompt_responses });
+    const game = Game.create(room_code, user_id, { prompts, prompt_responses });
     games.set(room_code, game);
 
     game.addPlayer(user_id, ws);

@@ -15,6 +15,7 @@ const prompt = signal("");
 const prompt_response_count = signal(1);
 const responses_for_prompter = signal<Record<string, Array<string>>>({});
 const room_code = signal("");
+const user_id = signal("");
 
 export const app_state = {
   awarded_prompts,
@@ -28,6 +29,7 @@ export const app_state = {
   prompt_response_count,
   responses_for_prompter,
   room_code,
+  user_id,
 };
 
 export const AppContext = createContext(app_state);

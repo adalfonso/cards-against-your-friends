@@ -21,6 +21,7 @@ export const informIdentity = (ws: WebSocket, user_id: string) => {
     JSON.stringify({
       event_type: WebSocketServerEvent.InformIdentity,
       data: {
+        user_id,
         nickname: nicknames.get(user_id) ?? "",
       },
     })
@@ -81,7 +82,7 @@ export const awardPrompt = (ws: WebSocket, data: { prompt: string }) => {
   );
 };
 
-export const informReconnection = (
+export const reconnectPlayer = (
   ws: WebSocket,
   data: {
     is_prompter: boolean;
@@ -90,11 +91,12 @@ export const informReconnection = (
     responses_for_prompter: Record<string, Array<string>>;
     awarded_prompts: Array<string>;
     game_state: GameState;
+    is_owner: boolean;
   }
 ) => {
   ws.send(
     JSON.stringify({
-      event_type: WebSocketServerEvent.InformReconnection,
+      event_type: WebSocketServerEvent.ReconnectPlayer,
       data,
     })
   );

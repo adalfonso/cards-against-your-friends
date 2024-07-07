@@ -35,6 +35,7 @@ export class Game {
 
   constructor(
     private _room_code: string,
+    private _owner_id: string,
     private _content: ContentStore
   ) {
     shuffle(this._content.prompts);
@@ -61,39 +62,46 @@ export class Game {
     return this.players.filter((player) => player !== this._current_prompter);
   }
 
-  public static create(room_code: string, content: ContentStore) {
-    return new Game(room_code, content);
+  public static create(
+    room_code: string,
+    owner: string,
+    content: ContentStore
+  ) {
+    return new Game(room_code, owner, content);
   }
 
   public addPlayer(user_id: string, ws: WebSocket) {
     const existing_player = this._players.get(user_id);
 
     if (existing_player) {
-      existing_player.ws = ws;
-
-      const { awarded_prompts, hand, prompt } = existing_player;
-
-      const is_prompter = existing_player === this._current_prompter;
-
-      outgoing.informReconnection(ws, {
-        is_prompter,
-        hand,
-        awarded_prompts,
-        prompt,
-        responses_for_prompter: is_prompter
-          ? this._received_prompt_responses
-          : {},
-        game_state: this._game_state,
-      });
-    } else {
-      this._players.set(user_id, {
-        user_id,
-        ws,
-        awarded_prompts: [],
-        hand: [],
-        prompt: "",
-      });
+      return this._reconnectPlayer(existing_player, ws);
     }
+
+    this._players.set(user_id, {
+      user_id,
+      ws,
+      awarded_prompts: [],
+      hand: [],
+      prompt: "",
+    });
+  }
+
+  private _reconnectPlayer(player: Player, ws: WebSocket) {
+    player.ws = ws;
+
+    const is_prompter = player === this._current_prompter;
+
+    outgoing.reconnectPlayer(player.ws, {
+      is_prompter,
+      hand: player.hand,
+      awarded_prompts: player.awarded_prompts,
+      prompt: player.prompt,
+      responses_for_prompter: is_prompter
+        ? this._received_prompt_responses
+        : {},
+      game_state: this._game_state,
+      is_owner: this._owner_id === player.user_id,
+    });
   }
 
   public start() {

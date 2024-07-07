@@ -49,8 +49,8 @@ export const connectWebSocket = (onSuccess: (ws: WebSocket) => void) => {
       case WebSocketServerEvent.AwardPrompt:
         return awardPrompt(payload.data);
 
-      case WebSocketServerEvent.InformReconnection:
-        return informReconnection(payload.data);
+      case WebSocketServerEvent.ReconnectPlayer:
+        return reconnectPlayer(payload.data);
 
       default:
         console.error(
@@ -67,8 +67,8 @@ const stateUpdate = (data: { game_state: GameState }) => {
   app_state.game_state.value = data.game_state;
 };
 
-const informIdentity = (data: { nickname: string }) => {
-  // Set cached nickname if there is one
+const informIdentity = (data: { user_id: string; nickname: string }) => {
+  app_state.user_id.value = data.user_id;
   app_state.nickname.value = data.nickname;
 };
 
@@ -110,13 +110,14 @@ const awardPrompt = (data: { prompt: string }) => {
   ];
 };
 
-const informReconnection = (data: {
+const reconnectPlayer = (data: {
   is_prompter: boolean;
   prompt: string;
   hand: Array<string>;
   responses_for_prompter: Record<string, Array<string>>;
   awarded_prompts: Array<string>;
   game_state: GameState;
+  is_owner: boolean;
 }) => {
   app_state.is_prompter.value = data.is_prompter;
   app_state.hand.value = data.hand;
@@ -124,6 +125,7 @@ const informReconnection = (data: {
   app_state.responses_for_prompter.value = data.responses_for_prompter;
   app_state.awarded_prompts.value = data.awarded_prompts;
   app_state.game_state.value = data.game_state;
+  app_state.is_owner.value === data.is_owner;
 
   // Implies prompter has to pick a resposne
   if (Object.values(data.responses_for_prompter).length) {

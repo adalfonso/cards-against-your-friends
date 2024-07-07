@@ -32,4 +32,5 @@ server/content
 # server/**/*.js
 .env
 coverage
+todo.txt
 

@@ -9,7 +9,7 @@ import { useBusy } from "./hooks/useBusy";
 import { getBaseUrl } from "./lib/utils";
 
 export const WaitingRoom = () => {
-  const { room_code, is_owner, nickname } = useContext(AppContext);
+  const { room_code, is_owner, nickname, user_id } = useContext(AppContext);
   const busy = useSignal(false);
   const nickname_input = useSignal("");
   const room_code_input = useSignal("");
@@ -27,7 +27,7 @@ export const WaitingRoom = () => {
 
   const redirectToJoinGame = (code: string) => {
     const url = new URL(window.location.href);
-    url.searchParams.set("code", code);
+    url.searchParams.set("code", code.toUpperCase());
 
     window.location.href = url.toString();
   };
@@ -43,7 +43,8 @@ export const WaitingRoom = () => {
       const game = await api.game.join.mutate({ room_code: code });
 
       room_code.value = game.room_code;
-      is_owner.value = false;
+      is_owner.value =
+        user_id.value !== "" && user_id.value === game.created_by;
     } catch (e) {
       alert("Failed to join game");
 
@@ -56,8 +57,7 @@ export const WaitingRoom = () => {
       await preConnect();
       const game = await api.game.create.mutate();
 
-      room_code.value = game.room_code;
-      is_owner.value = true;
+      redirectToJoinGame(game.room_code);
     }, "Failed to create or join game");
 
   const submitNickname = (_nickname: string) =>
@@ -92,7 +92,7 @@ export const WaitingRoom = () => {
           </button>
           <p className="or">OR</p>
 
-          <button onClick={() => createGame()}>CREATE GAME</button>
+          <button onClick={createGame}>CREATE GAME</button>
         </>
       )}
 

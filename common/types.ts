@@ -12,7 +12,7 @@ export const WebSocketServerEvent = {
   DeliverPromptResponses: "DELIVER_PROMPT_RESPONSES",
   EndGame: "END_GAME",
   InformIdentity: "INFORM_IDENTITY",
-  InformReconnection: "INFORM_RECONNECTION",
+  ReconnectPlayer: "RECONNECT_PLAYER",
   InitPromptee: "INIT_PROMPTEE",
   InitPrompter: "INIT_PROMPTER",
   StateUpdate: "STATE_UPDATE",
