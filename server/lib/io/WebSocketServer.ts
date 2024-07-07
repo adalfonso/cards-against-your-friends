@@ -16,6 +16,12 @@ export const createWebSocketServer = () => {
   wss.on("connection", (ws, request: Request) => {
     const user_id = request.session.user_id;
 
+    const existing_connection = clients.get(user_id);
+
+    if (existing_connection) {
+      existing_connection.terminate();
+    }
+
     clients.set(user_id, ws);
 
     ws.on("error", console.error);

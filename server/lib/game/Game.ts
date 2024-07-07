@@ -1,6 +1,7 @@
 import { Maybe } from "@common/types";
 import * as outgoing from "../io/outgoingWebSocketEvents";
 import { WebSocket } from "ws";
+import { card_hand_size, winning_count } from "@common/constants";
 
 type ContentStore = {
   prompts: Array<string>;
@@ -11,21 +12,15 @@ type Player = {
   user_id: string;
   ws: WebSocket;
   awarded_prompts: Array<string>;
+  prompt: string;
+  hand: Array<string>;
 };
-
-// Number of cards a player can have in their hand at one time
-const card_hand_size = 7;
-
-// Number of cards required to win
-const winning_count = 7;
 
 export class Game {
   public _players = new Map<string, Player>();
 
-  private _previous_prompter: Maybe<Player> = null;
   private _current_prompter: Maybe<Player> = null;
 
-  private _previous_response_count = 0;
   private _current_response_count = 0;
 
   private _received_prompt_responses: Record<string, Array<string>> = {};
@@ -49,19 +44,15 @@ export class Game {
   }
 
   get prompter() {
-    const prompter = this.players.find(
-      (player) => player === this._current_prompter
-    );
-
-    if (!prompter) {
+    if (!this._current_prompter) {
       throw new Error(`Could not find prompter`);
     }
 
-    return prompter;
+    return this._current_prompter;
   }
 
   get promptees() {
-    return this.players.filter((player) => player !== this.prompter);
+    return this.players.filter((player) => player !== this._current_prompter);
   }
 
   public static create(room_code: string, content: ContentStore) {
@@ -69,7 +60,34 @@ export class Game {
   }
 
   public addPlayer(user_id: string, ws: WebSocket) {
-    this._players.set(user_id, { user_id, ws, awarded_prompts: [] });
+    const existing_player = this._players.get(user_id);
+
+    if (existing_player) {
+      existing_player.ws = ws;
+
+      const { awarded_prompts, hand, prompt } = existing_player;
+
+      const is_prompter = existing_player === this._current_prompter;
+
+      outgoing.informReconnection(ws, {
+        is_prompter,
+        hand,
+        awarded_prompts,
+        prompt,
+        responses_for_prompter: is_prompter
+          ? this._received_prompt_responses
+          : {},
+        game_over: this._game_over,
+      });
+    } else {
+      this._players.set(user_id, {
+        user_id,
+        ws,
+        awarded_prompts: [],
+        hand: [],
+        prompt: "",
+      });
+    }
   }
 
   public start() {
@@ -96,19 +114,28 @@ export class Game {
 
   public receivePromptResponses(
     prompt_responses: Array<string>,
-    player: string
+    player_id: string
   ) {
-    this._received_prompt_responses[player] = prompt_responses;
+    this._received_prompt_responses[player_id] = prompt_responses;
+
+    const player = this._players.get(player_id);
+
+    if (!player) {
+      throw new Error("Could not find player when setting prompt responses");
+    }
+
+    player.hand = player.hand.filter(
+      (card) => !prompt_responses.includes(card)
+    );
 
     const received_all_prompt_responses =
       Object.keys(this._received_prompt_responses).length ===
       this._players.size - 1;
 
     if (received_all_prompt_responses) {
-      outgoing.deliverPromptResponses(
-        this.prompter.ws,
-        this._received_prompt_responses
-      );
+      outgoing.deliverPromptResponses(this.prompter.ws, {
+        responses_for_prompter: this._received_prompt_responses,
+      });
 
       this.promptees.forEach((promptee) => {
         outgoing.waitForNextRound(promptee.ws);
@@ -125,12 +152,10 @@ export class Game {
 
     player.awarded_prompts.push(prompt);
 
-    outgoing.awardPrompt(player.ws, prompt);
+    outgoing.awardPrompt(player.ws, { prompt });
 
     if (player.awarded_prompts.length === winning_count) {
-      this._players.forEach(({ user_id, ws }) =>
-        outgoing.endGame(ws, user_id === player.user_id)
-      );
+      this._players.forEach(({ ws }) => outgoing.endGame(ws));
       this._game_over = true;
     }
   }
@@ -139,20 +164,8 @@ export class Game {
     return this._content.prompts.pop() ?? "RAN OUT OF PROMPTS";
   }
 
-  private _getPromptResponseCount(player: Player) {
-    if (this._previous_response_count === 0) {
-      return card_hand_size;
-    }
-
-    if (player === this._previous_prompter) {
-      return 0;
-    }
-
-    this._previous_response_count;
-  }
-
-  private _getPromptResponses(player: Player) {
-    return new Array(this._getPromptResponseCount(player))
+  private _getAddlHand(player: Player) {
+    return new Array(card_hand_size - player.hand.length)
       .fill(0)
       .map(
         () => this._content.prompt_responses.pop() ?? "RAN OUT OF RESPONSES"
@@ -161,30 +174,33 @@ export class Game {
 
   private _nextTurnPrompter(player: Player) {
     const prompt = this._getPrompt();
+    const addl_hand = this._getAddlHand(player);
 
-    this._previous_response_count = this._current_response_count;
+    player.prompt = prompt;
+    player.hand = [...addl_hand, ...player.hand];
+
     this._current_response_count = countPrompts(prompt);
 
     outgoing.initPrompter(player.ws, {
       prompt,
-      prompt_responses: this._getPromptResponses(player),
+      hand: player.hand,
     });
 
     return prompt;
   }
 
   private _nextTurnPromptee(player: Player) {
-    outgoing.initPromptee(
-      player.ws,
-      this._getPromptResponses(player),
-      this._current_response_count
-    );
+    const addl_hand = this._getAddlHand(player);
+    player.hand = [...addl_hand, ...player.hand];
+
+    outgoing.initPromptee(player.ws, {
+      hand: player.hand,
+      prompt_response_count: this._current_response_count,
+    });
   }
 
   // Set the next player to be the prompter
   private _rotatePrompter() {
-    this._previous_prompter = this._current_prompter;
-
     const sorted_players = [...this._players.keys()].sort();
     const [starting_player_id] = sorted_players;
 

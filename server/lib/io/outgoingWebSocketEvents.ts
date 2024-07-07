@@ -5,12 +5,12 @@ import { nicknames } from "./WebSocketServer";
 
 export const initPrompter = (
   ws: WebSocket,
-  content: { prompt: string; prompt_responses: Array<string> }
+  data: { prompt: string; hand: Array<string> }
 ) => {
   ws.send(
     JSON.stringify({
       event_type: WebSocketServerEvent.InitPrompter,
-      data: { content },
+      data,
     })
   );
 };
@@ -28,25 +28,27 @@ export const informIdentity = (ws: WebSocket, user_id: string) => {
 
 export const initPromptee = (
   ws: WebSocket,
-  content: string[],
-  prompt_response_count: number
+  data: {
+    hand: string[];
+    prompt_response_count: number;
+  }
 ) => {
   ws.send(
     JSON.stringify({
       event_type: WebSocketServerEvent.InitPromptee,
-      data: { content, prompt_response_count },
+      data,
     })
   );
 };
 
 export const deliverPromptResponses = (
   ws: WebSocket,
-  content: Record<string, string[]>
+  data: { responses_for_prompter: Record<string, string[]> }
 ) => {
   ws.send(
     JSON.stringify({
       event_type: WebSocketServerEvent.DeliverPromptResponses,
-      data: { content },
+      data,
     })
   );
 };
@@ -69,20 +71,39 @@ export const startGame = (ws: WebSocket) => {
   );
 };
 
-export const awardPrompt = (ws: WebSocket, prompt: string) => {
+export const awardPrompt = (ws: WebSocket, data: { prompt: string }) => {
   ws.send(
     JSON.stringify({
       event_type: WebSocketServerEvent.AwardPrompt,
-      data: { prompt },
+      data,
     })
   );
 };
 
-export const endGame = (ws: WebSocket, winner: boolean) => {
+export const endGame = (ws: WebSocket) => {
   ws.send(
     JSON.stringify({
       event_type: WebSocketServerEvent.EndGame,
-      data: { winner },
+      data: {},
+    })
+  );
+};
+
+export const informReconnection = (
+  ws: WebSocket,
+  data: {
+    is_prompter: boolean;
+    prompt: string;
+    hand: Array<string>;
+    responses_for_prompter: Record<string, Array<string>>;
+    awarded_prompts: Array<string>;
+    game_over: boolean;
+  }
+) => {
+  ws.send(
+    JSON.stringify({
+      event_type: WebSocketServerEvent.InformReconnection,
+      data,
     })
   );
 };

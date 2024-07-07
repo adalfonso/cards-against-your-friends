@@ -1,5 +1,5 @@
 import { useSignal } from "@preact/signals";
-import { useContext } from "preact/hooks";
+import { useContext, useEffect } from "preact/hooks";
 
 import "./WaitingRoom.scss";
 import { AppContext } from "./AppState";
@@ -14,16 +14,43 @@ export const WaitingRoom = () => {
   const room_code_input = useSignal("");
   const busyHandler = useBusy(busy);
 
-  const createOrJoinGame = (code?: string) =>
+  useEffect(() => {
+    const code = new URL(window.location.href).searchParams.get("code");
+
+    if (!code) {
+      return;
+    }
+
+    joinGame(code);
+  }, []);
+
+  const redirectToJoinGame = (code: string) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set("code", code);
+
+    window.location.href = url.toString();
+  };
+
+  const preConnect = async () => {
+    await api.game.startSession.mutate();
+    await Socket.init();
+  };
+
+  const joinGame = async (code: string) => {
+    await preConnect();
+    const game = await api.game.join.mutate({ room_code: code });
+
+    room_code.value = game.room_code;
+    owner.value = false;
+  };
+
+  const createGame = () =>
     busyHandler(async () => {
-      await api.game.startSession.mutate();
-      await Socket.init();
-      const game = await (code
-        ? api.game.join.mutate({ room_code: code })
-        : api.game.create.mutate());
+      await preConnect();
+      const game = await api.game.create.mutate();
 
       room_code.value = game.room_code;
-      owner.value = !code;
+      owner.value = true;
     }, "Failed to create or join game");
 
   const submitNickname = (_nickname: string) =>
@@ -52,13 +79,13 @@ export const WaitingRoom = () => {
           />
           <button
             disabled={room_code_input.value.length !== 4}
-            onClick={() => createOrJoinGame(room_code_input.value)}
+            onClick={() => redirectToJoinGame(room_code_input.value)}
           >
             JOIN
           </button>
           <p className="or">OR</p>
 
-          <button onClick={() => createOrJoinGame()}>CREATE GAME</button>
+          <button onClick={() => createGame()}>CREATE GAME</button>
         </>
       )}
 

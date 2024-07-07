@@ -8,17 +8,10 @@ import { Socket } from "./lib/websocket/Socket";
 
 export const PlayerTurn = () => {
   const selected_cards = useSignal<Array<string>>([]);
-  const {
-    is_prompter,
-    prompt,
-    responses_for_promptee,
-    prompt_response_count,
-    room_code,
-  } = useContext(AppContext);
+  const { is_prompter, prompt, hand, prompt_response_count, room_code } =
+    useContext(AppContext);
 
-  const cards = is_prompter.value
-    ? [prompt.value]
-    : responses_for_promptee.value;
+  const cards = is_prompter.value ? [prompt.value] : hand.value;
 
   const selectCard = (prompt_response: string) => {
     if (is_prompter.value) {
@@ -34,7 +27,7 @@ export const PlayerTurn = () => {
 
   const sendPromptResponses = () => {
     Socket.sendPromptResponses(room_code.value, selected_cards.value);
-    responses_for_promptee.value = responses_for_promptee.value.filter(
+    hand.value = hand.value.filter(
       (response) => !selected_cards.value.includes(response)
     );
   };

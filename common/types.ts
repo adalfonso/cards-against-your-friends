@@ -15,6 +15,7 @@ export const WebSocketServerEvent = {
   DeliverPromptResponses: "DELIVER_PROMPT_RESPONSES",
   WaitForNextRound: "WAIT_FOR_NEXT_ROUND",
   AwardPrompt: "AWARD_PROMPT",
+  InformReconnection: "INFORM_RECONNECTION",
   EndGame: "END_GAME",
 } as const;
 

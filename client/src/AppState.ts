@@ -15,10 +15,9 @@ const owner = signal(false);
 const player_state = signal<PlayerState>("INIT");
 const prompt = signal("");
 const prompt_response_count = signal(1);
-const responses_for_promptee = signal<Array<string>>([]);
+const hand = signal<Array<string>>([]);
 const responses_for_prompter = signal<Record<string, Array<string>>>({});
 const room_code = signal("");
-const winner = signal(false);
 
 export const app_state = {
   awarded_prompts,
@@ -28,10 +27,9 @@ export const app_state = {
   player_state,
   prompt,
   prompt_response_count,
-  responses_for_promptee,
+  hand,
   responses_for_prompter,
   room_code,
-  winner,
 };
 
 export const AppContext = createContext(app_state);

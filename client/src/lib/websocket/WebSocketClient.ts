@@ -6,7 +6,7 @@ import { app_state } from "../../AppState";
 
 export const connectWebSocket = (onSuccess: (ws: WebSocket) => void) => {
   const host = window.location.host;
-  const protocol = /^localhost:/.test(host) ? "wss" : "wss";
+  const protocol = /^localhost:/.test(host) ? "ws" : "wss";
 
   const ws = new WebSocket(`${protocol}://${host}/ws`);
 
@@ -52,6 +52,9 @@ export const connectWebSocket = (onSuccess: (ws: WebSocket) => void) => {
       case WebSocketServerEvent.EndGame:
         return endGame(payload.data);
 
+      case WebSocketServerEvent.InformReconnection:
+        return informReconnection(payload.data);
+
       default:
         console.error(
           "Received unknown websocket event type:",
@@ -63,53 +66,35 @@ export const connectWebSocket = (onSuccess: (ws: WebSocket) => void) => {
   return ws;
 };
 
-const informIdentity = ({ nickname }: { nickname: string }) => {
+const informIdentity = (data: { nickname: string }) => {
   // Set cached nickname if there is one
-  app_state.nickname.value = nickname;
+  app_state.nickname.value = data.nickname;
 };
 
-const initPrompter = ({
-  content,
-}: {
-  content: {
-    prompt: string;
-    prompt_responses: Array<string>;
-  };
-}) => {
+const initPrompter = (data: { prompt: string; hand: Array<string> }) => {
   app_state.is_prompter.value = true;
-  app_state.prompt.value = content.prompt;
-  app_state.responses_for_promptee.value = [
-    ...content.prompt_responses,
-    ...app_state.responses_for_promptee.value,
-  ];
+  app_state.prompt.value = data.prompt;
+  app_state.hand.value = data.hand;
   app_state.responses_for_prompter.value = {};
   app_state.player_state.value = "ACTIVE";
 };
 
-const initPromptee = ({
-  content,
-  prompt_response_count,
-}: {
-  content: string[];
+const initPromptee = (data: {
+  hand: string[];
   prompt_response_count: number;
 }) => {
   app_state.is_prompter.value = false;
   app_state.prompt.value = "";
-  app_state.responses_for_promptee.value = [
-    ...content,
-    ...app_state.responses_for_promptee.value,
-  ];
-  app_state.prompt_response_count.value = prompt_response_count;
+  app_state.hand.value = data.hand;
+  app_state.prompt_response_count.value = data.prompt_response_count;
   app_state.responses_for_prompter.value = {};
   app_state.player_state.value = "ACTIVE";
 };
 
-const deliverPromptResponses = ({
-  content,
-}: {
-  content: Record<string, Array<string>>;
+const deliverPromptResponses = (data: {
+  responses_for_prompter: Record<string, Array<string>>;
 }) => {
-  app_state.responses_for_prompter.value = content;
+  app_state.responses_for_prompter.value = data.responses_for_prompter;
   app_state.player_state.value = "PROMPTER_DECIDING";
 };
 
@@ -117,14 +102,38 @@ const waitForNextRound = () => {
   app_state.player_state.value = "PROMPTEE_WAITING";
 };
 
-const awardPrompt = ({ prompt }: { prompt: string }) => {
+const awardPrompt = (data: { prompt: string }) => {
   app_state.awarded_prompts.value = [
     ...app_state.awarded_prompts.value,
-    prompt,
+    data.prompt,
   ];
 };
 
-const endGame = ({ winner }: { winner: string }) => {
-  app_state.winner.value = winner;
+const endGame = () => {
   app_state.player_state.value = "ENDED";
+};
+
+const informReconnection = (data: {
+  is_prompter: boolean;
+  prompt: string;
+  hand: Array<string>;
+  responses_for_prompter: Record<string, Array<string>>;
+  awarded_prompts: Array<string>;
+  game_over: boolean;
+}) => {
+  app_state.is_prompter.value = data.is_prompter;
+  app_state.hand.value = data.hand;
+  app_state.prompt.value = data.prompt;
+  app_state.responses_for_prompter.value = data.responses_for_prompter;
+  app_state.awarded_prompts.value = data.awarded_prompts;
+
+  if (data.game_over) {
+    app_state.player_state.value = "ENDED";
+  } else if (Object.values(data.responses_for_prompter).length) {
+    app_state.player_state.value = "PROMPTER_DECIDING";
+  } else if (data.hand.length < 7) {
+    app_state.player_state.value = "PROMPTEE_WAITING";
+  } else {
+    app_state.player_state.value = "ACTIVE";
+  }
 };
