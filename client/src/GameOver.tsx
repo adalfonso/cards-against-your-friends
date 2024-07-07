@@ -12,6 +12,18 @@ export const GameOver = () => {
           ? "You Won!"
           : "You Lost!"}
       </h1>
+
+      <h6>
+        <a href={getBaseUrl()}>New Game</a>
+      </h6>
     </div>
   );
+};
+
+const getBaseUrl = () => {
+  const url = new URL(window.location.href);
+
+  url.search = "";
+
+  return url.toString();
 };
