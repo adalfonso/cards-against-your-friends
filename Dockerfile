@@ -7,5 +7,5 @@ RUN corepack enable
 RUN corepack prepare pnpm@9.4.0 --activate
 RUN pnpm i
 COPY . .
-EXPOSE 4201
+EXPOSE 4200
 CMD ["pnpm","start"]

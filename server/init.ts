@@ -51,7 +51,7 @@ const required_vars = [
 
 const defaults: Record<string, string> = {
   NODE_ENV: "development",
-  NODE_PORT: "4201",
+  NODE_PORT: "4200",
   SOURCE_DIR: "dist/client",
 } as const;
 

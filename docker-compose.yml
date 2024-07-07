@@ -6,7 +6,7 @@ services:
     image: adalfonso/cayf
     restart: unless-stopped
     ports:
-      - 4201:4201
+      - 4200:4200
     env_file:
       - .env
     volumes:
