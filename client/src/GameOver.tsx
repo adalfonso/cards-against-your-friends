@@ -2,6 +2,7 @@ import "./GameOver.scss";
 import { AppContext } from "./AppState";
 import { useContext } from "preact/hooks";
 import { WINNING_COUNT } from "@common/constants";
+import { getBaseUrl } from "./lib/utils";
 
 export const GameOver = () => {
   const { awarded_prompts } = useContext(AppContext);
@@ -18,12 +19,4 @@ export const GameOver = () => {
       </h6>
     </div>
   );
-};
-
-const getBaseUrl = () => {
-  const url = new URL(window.location.href);
-
-  url.search = "";
-
-  return url.toString();
 };

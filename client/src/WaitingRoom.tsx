@@ -6,6 +6,7 @@ import { AppContext } from "./AppState";
 import { api } from "./Api";
 import { Socket } from "./lib/websocket/Socket";
 import { useBusy } from "./hooks/useBusy";
+import { getBaseUrl } from "./lib/utils";
 
 export const WaitingRoom = () => {
   const { room_code, is_owner, nickname } = useContext(AppContext);
@@ -37,11 +38,17 @@ export const WaitingRoom = () => {
   };
 
   const joinGame = async (code: string) => {
-    await preConnect();
-    const game = await api.game.join.mutate({ room_code: code });
+    try {
+      await preConnect();
+      const game = await api.game.join.mutate({ room_code: code });
 
-    room_code.value = game.room_code;
-    is_owner.value = false;
+      room_code.value = game.room_code;
+      is_owner.value = false;
+    } catch (e) {
+      alert("Failed to join game");
+
+      window.location.href = getBaseUrl();
+    }
   };
 
   const createGame = () =>
