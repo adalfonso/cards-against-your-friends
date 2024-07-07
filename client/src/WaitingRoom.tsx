@@ -8,7 +8,7 @@ import { Socket } from "./lib/websocket/Socket";
 import { useBusy } from "./hooks/useBusy";
 
 export const WaitingRoom = () => {
-  const { room_code, owner, nickname } = useContext(AppContext);
+  const { room_code, is_owner, nickname } = useContext(AppContext);
   const busy = useSignal(false);
   const nickname_input = useSignal("");
   const room_code_input = useSignal("");
@@ -41,7 +41,7 @@ export const WaitingRoom = () => {
     const game = await api.game.join.mutate({ room_code: code });
 
     room_code.value = game.room_code;
-    owner.value = false;
+    is_owner.value = false;
   };
 
   const createGame = () =>
@@ -50,7 +50,7 @@ export const WaitingRoom = () => {
       const game = await api.game.create.mutate();
 
       room_code.value = game.room_code;
-      owner.value = true;
+      is_owner.value = true;
     }, "Failed to create or join game");
 
   const submitNickname = (_nickname: string) =>
@@ -113,7 +113,7 @@ export const WaitingRoom = () => {
             </>
           )}
 
-          {owner.value && (
+          {is_owner.value && (
             <button
               className="start-game-button"
               onClick={() => startGame()}
@@ -123,7 +123,7 @@ export const WaitingRoom = () => {
             </button>
           )}
 
-          {!owner.value && nickname.value.length > 0 && (
+          {!is_owner.value && nickname.value.length > 0 && (
             <p>Waiting for game owner to start...</p>
           )}
         </>
