@@ -1,11 +1,13 @@
 import { signal } from "@preact/signals";
-import { GameState } from "@prisma/client";
 import { createContext } from "preact";
+
+// TODO: keep up to date with prisma
+export type GameState = "INIT" | "ACTIVE" | "ENDED";
 
 import { PlayerState } from "@common/constants";
 
 const awarded_prompts = signal<Array<string>>([]);
-const game_state = signal<GameState>(GameState.INIT);
+const game_state = signal<GameState>("INIT");
 const hand = signal<Array<string>>([]);
 const is_owner = signal(false);
 const is_prompter = signal(false);

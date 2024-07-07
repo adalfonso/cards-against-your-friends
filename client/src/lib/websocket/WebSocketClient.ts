@@ -1,7 +1,5 @@
-import { GameState } from "@prisma/client";
-
 import { WebSocketClientEvent, WebSocketServerEvent } from "@common/types";
-import { app_state } from "../../AppState";
+import { app_state, GameState } from "../../AppState";
 import { CARD_HAND_SIZE, PlayerState } from "@common/constants";
 
 export const connectWebSocket = (onSuccess: (ws: WebSocket) => void) => {
