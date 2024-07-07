@@ -1,4 +1,4 @@
-import { Maybe, WebSocketClientEvent } from "../../../../common/types";
+import { Maybe, WebSocketClientEvent } from "@common/types";
 import { connectWebSocket } from "./WebSocketClient";
 
 let _connection: Maybe<WebSocket> = null;

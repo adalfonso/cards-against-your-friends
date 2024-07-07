@@ -1,7 +1,8 @@
 import { Maybe } from "@common/types";
 import * as outgoing from "../io/outgoingWebSocketEvents";
 import { WebSocket } from "ws";
-import { card_hand_size, winning_count } from "@common/constants";
+import { CARD_HAND_SIZE, WINNING_COUNT } from "@common/constants";
+import { GameState } from "@prisma/client";
 
 type ContentStore = {
   prompts: Array<string>;
@@ -17,15 +18,20 @@ type Player = {
 };
 
 export class Game {
+  // All game players
   public _players = new Map<string, Player>();
 
+  // Current player to prompt others
   private _current_prompter: Maybe<Player> = null;
 
+  // Number of blanks in the current prompt
   private _current_response_count = 0;
 
+  // Temp holding space for prompt responses submitted in a round
   private _received_prompt_responses: Record<string, Array<string>> = {};
 
-  private _game_over = false;
+  // State of the game
+  private _game_state: GameState = GameState.INIT;
 
   constructor(
     private _room_code: string,
@@ -77,7 +83,7 @@ export class Game {
         responses_for_prompter: is_prompter
           ? this._received_prompt_responses
           : {},
-        game_over: this._game_over,
+        game_state: this._game_state,
       });
     } else {
       this._players.set(user_id, {
@@ -95,13 +101,17 @@ export class Game {
       throw new Error("Cannot start game with a single player");
     }
 
-    this._players.forEach(({ ws }) => outgoing.startGame(ws));
+    this._game_state = GameState.ACTIVE;
+
+    this._players.forEach(({ ws }) =>
+      outgoing.stateUpdate(ws, { game_state: this._game_state })
+    );
 
     this.nextTurn();
   }
 
   public nextTurn() {
-    if (this._game_over) {
+    if (this._game_state === GameState.ENDED) {
       return;
     }
 
@@ -154,9 +164,12 @@ export class Game {
 
     outgoing.awardPrompt(player.ws, { prompt });
 
-    if (player.awarded_prompts.length === winning_count) {
-      this._players.forEach(({ ws }) => outgoing.endGame(ws));
-      this._game_over = true;
+    if (player.awarded_prompts.length === WINNING_COUNT) {
+      this._game_state = GameState.ENDED;
+
+      this._players.forEach(({ ws }) =>
+        outgoing.stateUpdate(ws, { game_state: this._game_state })
+      );
     }
   }
 
@@ -165,7 +178,7 @@ export class Game {
   }
 
   private _getAddlHand(player: Player) {
-    return new Array(card_hand_size - player.hand.length)
+    return new Array(CARD_HAND_SIZE - player.hand.length)
       .fill(0)
       .map(
         () => this._content.prompt_responses.pop() ?? "RAN OUT OF RESPONSES"

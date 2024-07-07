@@ -1,8 +1,8 @@
-import {
-  WebSocketClientEvent,
-  WebSocketServerEvent,
-} from "../../../../common/types";
+import { GameState } from "@prisma/client";
+
+import { WebSocketClientEvent, WebSocketServerEvent } from "@common/types";
 import { app_state } from "../../AppState";
+import { CARD_HAND_SIZE, PlayerState } from "@common/constants";
 
 export const connectWebSocket = (onSuccess: (ws: WebSocket) => void) => {
   const host = window.location.host;
@@ -31,8 +31,8 @@ export const connectWebSocket = (onSuccess: (ws: WebSocket) => void) => {
       case WebSocketServerEvent.InformIdentity:
         return informIdentity(payload.data);
 
-      case WebSocketServerEvent.StartGame:
-        return (app_state.player_state.value = "ACTIVE");
+      case WebSocketServerEvent.StateUpdate:
+        return stateUpdate(payload.data);
 
       case WebSocketServerEvent.InitPrompter:
         return initPrompter(payload.data);
@@ -49,9 +49,6 @@ export const connectWebSocket = (onSuccess: (ws: WebSocket) => void) => {
       case WebSocketServerEvent.AwardPrompt:
         return awardPrompt(payload.data);
 
-      case WebSocketServerEvent.EndGame:
-        return endGame(payload.data);
-
       case WebSocketServerEvent.InformReconnection:
         return informReconnection(payload.data);
 
@@ -66,6 +63,10 @@ export const connectWebSocket = (onSuccess: (ws: WebSocket) => void) => {
   return ws;
 };
 
+const stateUpdate = (data: { game_state: GameState }) => {
+  app_state.game_state.value = data.game_state;
+};
+
 const informIdentity = (data: { nickname: string }) => {
   // Set cached nickname if there is one
   app_state.nickname.value = data.nickname;
@@ -76,7 +77,7 @@ const initPrompter = (data: { prompt: string; hand: Array<string> }) => {
   app_state.prompt.value = data.prompt;
   app_state.hand.value = data.hand;
   app_state.responses_for_prompter.value = {};
-  app_state.player_state.value = "ACTIVE";
+  app_state.player_state.value = PlayerState.WAITING;
 };
 
 const initPromptee = (data: {
@@ -88,18 +89,18 @@ const initPromptee = (data: {
   app_state.hand.value = data.hand;
   app_state.prompt_response_count.value = data.prompt_response_count;
   app_state.responses_for_prompter.value = {};
-  app_state.player_state.value = "ACTIVE";
+  app_state.player_state.value = PlayerState.DECIDING;
 };
 
 const deliverPromptResponses = (data: {
   responses_for_prompter: Record<string, Array<string>>;
 }) => {
   app_state.responses_for_prompter.value = data.responses_for_prompter;
-  app_state.player_state.value = "PROMPTER_DECIDING";
+  app_state.player_state.value = PlayerState.DECIDING;
 };
 
 const waitForNextRound = () => {
-  app_state.player_state.value = "PROMPTEE_WAITING";
+  app_state.player_state.value = PlayerState.WAITING;
 };
 
 const awardPrompt = (data: { prompt: string }) => {
@@ -109,31 +110,28 @@ const awardPrompt = (data: { prompt: string }) => {
   ];
 };
 
-const endGame = () => {
-  app_state.player_state.value = "ENDED";
-};
-
 const informReconnection = (data: {
   is_prompter: boolean;
   prompt: string;
   hand: Array<string>;
   responses_for_prompter: Record<string, Array<string>>;
   awarded_prompts: Array<string>;
-  game_over: boolean;
+  game_state: GameState;
 }) => {
   app_state.is_prompter.value = data.is_prompter;
   app_state.hand.value = data.hand;
   app_state.prompt.value = data.prompt;
   app_state.responses_for_prompter.value = data.responses_for_prompter;
   app_state.awarded_prompts.value = data.awarded_prompts;
+  app_state.game_state.value = data.game_state;
 
-  if (data.game_over) {
-    app_state.player_state.value = "ENDED";
-  } else if (Object.values(data.responses_for_prompter).length) {
-    app_state.player_state.value = "PROMPTER_DECIDING";
-  } else if (data.hand.length < 7) {
-    app_state.player_state.value = "PROMPTEE_WAITING";
-  } else {
-    app_state.player_state.value = "ACTIVE";
+  // Implies prompter has to pick a resposne
+  if (Object.values(data.responses_for_prompter).length) {
+    app_state.player_state.value = PlayerState.DECIDING;
+  }
+
+  // If a player has all their cards and is not the prompter they have to pick still
+  if (!data.is_prompter && data.hand.length === CARD_HAND_SIZE) {
+    app_state.player_state.value = PlayerState.DECIDING;
   }
 };

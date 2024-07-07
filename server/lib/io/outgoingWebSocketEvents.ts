@@ -1,3 +1,4 @@
+import { GameState } from "@prisma/client";
 import { WebSocket } from "ws";
 
 import { WebSocketServerEvent } from "@common/types";
@@ -62,11 +63,11 @@ export const waitForNextRound = (ws: WebSocket) => {
   );
 };
 
-export const startGame = (ws: WebSocket) => {
+export const stateUpdate = (ws: WebSocket, data: { game_state: GameState }) => {
   ws.send(
     JSON.stringify({
-      event_type: WebSocketServerEvent.StartGame,
-      data: {},
+      event_type: WebSocketServerEvent.StateUpdate,
+      data,
     })
   );
 };
@@ -80,15 +81,6 @@ export const awardPrompt = (ws: WebSocket, data: { prompt: string }) => {
   );
 };
 
-export const endGame = (ws: WebSocket) => {
-  ws.send(
-    JSON.stringify({
-      event_type: WebSocketServerEvent.EndGame,
-      data: {},
-    })
-  );
-};
-
 export const informReconnection = (
   ws: WebSocket,
   data: {
@@ -97,7 +89,7 @@ export const informReconnection = (
     hand: Array<string>;
     responses_for_prompter: Record<string, Array<string>>;
     awarded_prompts: Array<string>;
-    game_over: boolean;
+    game_state: GameState;
   }
 ) => {
   ws.send(

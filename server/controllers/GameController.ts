@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import { GameState } from "@prisma/client";
 
 import { Database } from "@server/lib/data/Database";
 import { Request } from "@server/trpc";
@@ -83,7 +84,7 @@ export const GameController = {
           user_id,
           nicknames.get(user_id) ?? "",
         ]),
-        state: "ACTIVE",
+        state: GameState.ACTIVE,
       },
     });
   },
