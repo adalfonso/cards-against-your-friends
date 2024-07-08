@@ -1,4 +1,4 @@
-import { Maybe } from "@common/types";
+import { BasePlayer, Maybe } from "@common/types";
 import * as outgoing from "../io/outgoingWebSocketEvents";
 import { WebSocket } from "ws";
 import { CARD_HAND_SIZE, WINNING_COUNT } from "@common/constants";
@@ -9,8 +9,7 @@ type ContentStore = {
   prompt_responses: Array<string>;
 };
 
-type Player = {
-  user_id: string;
+type Player = BasePlayer & {
   ws: WebSocket;
   awarded_prompts: Array<string>;
   prompt: string;
@@ -70,11 +69,11 @@ export class Game {
     return new Game(room_code, owner, content);
   }
 
-  public addPlayer(user_id: string, ws: WebSocket) {
+  public addPlayer(user_id: string, nickname: string, ws: WebSocket) {
     const existing_player = this._players.get(user_id);
 
     if (existing_player) {
-      return this._reconnectPlayer(existing_player, ws);
+      return this._reconnectPlayer(existing_player, nickname, ws);
     }
 
     this._players.set(user_id, {
@@ -83,11 +82,15 @@ export class Game {
       awarded_prompts: [],
       hand: [],
       prompt: "",
+      nickname,
     });
+
+    this._sendUpdatePlayers();
   }
 
-  private _reconnectPlayer(player: Player, ws: WebSocket) {
+  private _reconnectPlayer(player: Player, nickname: string, ws: WebSocket) {
     player.ws = ws;
+    player.nickname = nickname ?? player.nickname;
 
     const is_prompter = player === this._current_prompter;
 
@@ -101,7 +104,13 @@ export class Game {
         : {},
       game_state: this._game_state,
       is_owner: this._owner_id === player.user_id,
+      players: this.players.map(({ user_id, nickname }) => ({
+        user_id,
+        nickname,
+      })),
     });
+
+    this._sendUpdatePlayers();
   }
 
   public start() {
@@ -243,6 +252,17 @@ export class Game {
         ) as Player;
       }
     }
+  }
+
+  private _sendUpdatePlayers() {
+    this._players.forEach(({ ws }) =>
+      outgoing.updatePlayers(ws, {
+        players: this.players.map(({ user_id, nickname }) => ({
+          user_id,
+          nickname,
+        })),
+      })
+    );
   }
 }
 

@@ -1,4 +1,8 @@
-import { WebSocketClientEvent, WebSocketServerEvent } from "@common/types";
+import {
+  BasePlayer,
+  WebSocketClientEvent,
+  WebSocketServerEvent,
+} from "@common/types";
 import { app_state, GameState } from "../../AppState";
 import { CARD_HAND_SIZE, PlayerState } from "@common/constants";
 
@@ -46,6 +50,9 @@ export const connectWebSocket = (onSuccess: (ws: WebSocket) => void) => {
 
       case WebSocketServerEvent.AwardPrompt:
         return awardPrompt(payload.data);
+
+      case WebSocketServerEvent.UpdatePlayers:
+        return updatePlayers(payload.data);
 
       case WebSocketServerEvent.ReconnectPlayer:
         return reconnectPlayer(payload.data);
@@ -108,6 +115,10 @@ const awardPrompt = (data: { prompt: string }) => {
   ];
 };
 
+const updatePlayers = (data: { players: Array<BasePlayer> }) => {
+  app_state.players.value = data.players;
+};
+
 const reconnectPlayer = (data: {
   is_prompter: boolean;
   prompt: string;
@@ -116,6 +127,7 @@ const reconnectPlayer = (data: {
   awarded_prompts: Array<string>;
   game_state: GameState;
   is_owner: boolean;
+  players: Array<BasePlayer>;
 }) => {
   app_state.is_prompter.value = data.is_prompter;
   app_state.hand.value = data.hand;
@@ -124,6 +136,7 @@ const reconnectPlayer = (data: {
   app_state.awarded_prompts.value = data.awarded_prompts;
   app_state.game_state.value = data.game_state;
   app_state.is_owner.value === data.is_owner;
+  app_state.players.value = data.players;
 
   // Implies prompter has to pick a resposne
   if (Object.values(data.responses_for_prompter).length) {

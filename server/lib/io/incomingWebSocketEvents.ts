@@ -4,19 +4,30 @@ import { clients, games, nicknames } from "./WebSocketServer";
 import * as outgoing from "./outgoingWebSocketEvents";
 
 // Associates user_id with client's websocket
-export const identify = (ws: WebSocket, user_id: string) => {
-  clients.set(user_id, ws);
+export const identify = (ws: WebSocket, data: { user_id: string }) => {
+  clients.set(data.user_id, ws);
 
-  outgoing.informIdentity(ws, user_id);
+  outgoing.informIdentity(ws, data.user_id);
 };
 
 // Updates nickname for a client
-export const setNickname = (user_id: string, nickname: string) => {
-  if (!nickname || typeof nickname !== "string") {
+export const setNickname = (
+  ws: WebSocket,
+  data: { user_id: string; nickname: string; room_code: string }
+) => {
+  if (!data.nickname || typeof data.nickname !== "string") {
     return console.error("Failed to detect nickname during set");
   }
 
-  nicknames.set(user_id, nickname);
+  nicknames.set(data.user_id, data.nickname);
+
+  const game = games.get(data.room_code);
+
+  if (!game) {
+    throw new Error("Could not find game when updating player's nickname");
+  }
+
+  game.addPlayer(data.user_id, nicknames.get(data.user_id) ?? "", ws);
 };
 
 // Updates the responses for a promptee

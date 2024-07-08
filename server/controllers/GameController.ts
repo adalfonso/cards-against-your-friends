@@ -22,7 +22,7 @@ export const GameController = {
     const game = Game.create(room_code, user_id, { prompts, prompt_responses });
     games.set(room_code, game);
 
-    game.addPlayer(user_id, ws);
+    game.addPlayer(user_id, nicknames.get(user_id) ?? "", ws);
 
     return game_document;
   },
@@ -40,7 +40,7 @@ export const GameController = {
 
     const game_instance = getGameInstanceOrThrow(room_code);
 
-    game_instance.addPlayer(user_id, ws);
+    game_instance.addPlayer(user_id, nicknames.get(user_id) ?? "", ws);
 
     return game_document;
   },

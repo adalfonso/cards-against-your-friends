@@ -1,7 +1,7 @@
 import { GameState } from "@prisma/client";
 import { WebSocket } from "ws";
 
-import { WebSocketServerEvent } from "@common/types";
+import { BasePlayer, WebSocketServerEvent } from "@common/types";
 import { nicknames } from "./WebSocketServer";
 
 export const initPrompter = (
@@ -82,6 +82,18 @@ export const awardPrompt = (ws: WebSocket, data: { prompt: string }) => {
   );
 };
 
+export const updatePlayers = (
+  ws: WebSocket,
+  data: { players: Array<BasePlayer> }
+) => {
+  ws.send(
+    JSON.stringify({
+      event_type: WebSocketServerEvent.UpdatePlayers,
+      data,
+    })
+  );
+};
+
 export const reconnectPlayer = (
   ws: WebSocket,
   data: {
@@ -92,6 +104,7 @@ export const reconnectPlayer = (
     awarded_prompts: Array<string>;
     game_state: GameState;
     is_owner: boolean;
+    players: Array<BasePlayer>;
   }
 ) => {
   ws.send(

@@ -32,10 +32,10 @@ export const createWebSocketServer = () => {
 
       switch (payload.event_type) {
         case WebSocketClientEvent.Identify:
-          return incoming.identify(ws, user_id);
+          return incoming.identify(ws, { user_id });
 
         case WebSocketClientEvent.SetNickname:
-          return incoming.setNickname(user_id, payload.data.nickname);
+          return incoming.setNickname(ws, { user_id, ...payload.data });
 
         case WebSocketClientEvent.SendPromptResponses:
           return incoming.receivePromptResponses(user_id, payload.data);

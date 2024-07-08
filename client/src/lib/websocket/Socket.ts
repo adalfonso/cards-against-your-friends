@@ -23,11 +23,11 @@ export class Socket {
     return _connection as WebSocket;
   }
 
-  static submitNickname(nickname: string) {
+  static submitNickname(nickname: string, room_code: string) {
     Socket.connection.send(
       JSON.stringify({
         event_type: WebSocketClientEvent.SetNickname,
-        data: { nickname },
+        data: { nickname, room_code },
       })
     );
   }

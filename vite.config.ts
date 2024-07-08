@@ -8,7 +8,6 @@ export default defineConfig({
   plugins: [preact()],
   resolve: {
     alias: {
-      "@server": path.resolve(__dirname, "./server"),
       "@common": path.resolve(__dirname, "./common"),
     },
   },
