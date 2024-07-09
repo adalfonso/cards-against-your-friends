@@ -74,6 +74,8 @@ export class Game {
 
     if (existing_player) {
       return this._reconnectPlayer(existing_player, nickname, ws);
+    } else if (this._game_state === GameState.ACTIVE) {
+      throw new Error("A new player can't join an active game");
     }
 
     this._players.set(user_id, {
