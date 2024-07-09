@@ -29,7 +29,7 @@
     min-width: calc(100% - 2px - $viewport-padding-x * 2);
     width: 100%;
     margin: 0 0 0 $viewport-padding-x;
-    font-size: 1.35rem;
+    font-size: 1.25rem;
     aspect-ratio: 20/28;
     display: flex;
     flex-direction: column;
@@ -51,6 +51,17 @@
 
     > .star {
       text-align: right;
+    }
+
+    > .card-logo {
+      background: url("waygood.svg") no-repeat center;
+      background-size: contain;
+      height: 2rem;
+      width: 2rem;
+      position: absolute;
+      left: 2rem;
+      bottom: 1.5rem;
+      padding: 0;
     }
 
     &:last-of-type {

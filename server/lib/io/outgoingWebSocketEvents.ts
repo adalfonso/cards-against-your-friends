@@ -73,7 +73,10 @@ export const stateUpdate = (ws: WebSocket, data: { game_state: GameState }) => {
   );
 };
 
-export const awardPrompt = (ws: WebSocket, data: { prompt: string }) => {
+export const awardPrompt = (
+  ws: WebSocket,
+  data: { prompt: string; player: BasePlayer }
+) => {
   ws.send(
     JSON.stringify({
       event_type: WebSocketServerEvent.AwardPrompt,

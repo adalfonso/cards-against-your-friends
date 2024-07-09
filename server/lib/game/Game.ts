@@ -179,9 +179,14 @@ export class Game {
 
     player.awarded_prompts.push(prompt);
 
-    outgoing.awardPrompt(player.ws, { prompt });
-
-    if (player.awarded_prompts.length === WINNING_COUNT) {
+    if (player.awarded_prompts.length < WINNING_COUNT) {
+      this._players.forEach(({ ws }) =>
+        outgoing.awardPrompt(ws, {
+          prompt,
+          player: { user_id: player.user_id, nickname: player.nickname },
+        })
+      );
+    } else {
       this._game_state = GameState.ENDED;
 
       this._players.forEach(({ ws }) =>

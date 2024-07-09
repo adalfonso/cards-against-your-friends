@@ -108,11 +108,15 @@ const waitForNextRound = () => {
   app_state.player_state.value = PlayerState.WAITING;
 };
 
-const awardPrompt = (data: { prompt: string }) => {
-  app_state.awarded_prompts.value = [
-    ...app_state.awarded_prompts.value,
-    data.prompt,
-  ];
+const awardPrompt = (data: { prompt: string; player: BasePlayer }) => {
+  app_state.last_prompt_winner.value = data.player;
+
+  if (data.player.user_id === app_state.user_id.value) {
+    app_state.awarded_prompts.value = [
+      ...app_state.awarded_prompts.value,
+      data.prompt,
+    ];
+  }
 };
 
 const updatePlayers = (data: { players: Array<BasePlayer> }) => {

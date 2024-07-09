@@ -34,6 +34,7 @@ export const PrompterDeciding = () => {
                   {mergeResponsesIntoPrompt(prompt.value, responses)}
                 </div>
                 {selected && <div className="star">★</div>}
+                <div className="card-logo"></div>
               </div>
             );
           }

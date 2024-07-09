@@ -50,6 +50,7 @@ export const PlayerTurn = () => {
               }}
             >
               <div className="card-text">{cleaned_text}</div>
+              <div className="card-logo"></div>
 
               {selected && <div className="star">★</div>}
             </div>
