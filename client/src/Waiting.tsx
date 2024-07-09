@@ -1,3 +1,12 @@
+import "./Waiting.scss";
+import { Throbber } from "./Throbber";
+
 export const Waiting = () => {
-  return <div>Waiting for the prompter to choose a card... (way good)</div>;
+  return (
+    <div id="waiting">
+      <p>Waiting for the prompter to choose a card...</p>
+      <p>(way good)</p>
+      <Throbber />
+    </div>
+  );
 };
