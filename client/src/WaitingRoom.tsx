@@ -5,9 +5,10 @@ import "./WaitingRoom.scss";
 import { AppContext } from "./AppState";
 import { api } from "./Api";
 import { Socket } from "./lib/websocket/Socket";
-import { useBusy } from "./hooks/useBusy";
+
 import { getBaseUrl } from "./lib/utils";
 import { PlayerLobby } from "./WaitingRoom/PlayerLobby";
+import { Throbber } from "./Throbber";
 
 export const WaitingRoom = () => {
   const { room_code, is_owner, nickname, user_id, players } =
@@ -15,7 +16,6 @@ export const WaitingRoom = () => {
   const busy = useSignal(false);
   const nickname_input = useSignal("");
   const room_code_input = useSignal("");
-  const busyHandler = useBusy(busy);
 
   const players_with_nicknames = computed(() =>
     players.value.filter((player) => player.nickname !== "")
@@ -58,30 +58,25 @@ export const WaitingRoom = () => {
     }
   };
 
-  const createGame = () =>
-    busyHandler(async () => {
-      await preConnect();
-      const game = await api.game.create.mutate();
+  const createGame = async () => {
+    await preConnect();
+    const game = await api.game.create.mutate();
 
-      redirectToJoinGame(game.room_code);
-    }, "Failed to create or join game");
+    redirectToJoinGame(game.room_code);
+  };
 
-  const submitNickname = (_nickname: string) =>
-    busyHandler(() => {
-      Socket.submitNickname(_nickname, room_code.value);
+  const submitNickname = (_nickname: string) => {
+    Socket.submitNickname(_nickname, room_code.value);
 
-      nickname.value = _nickname;
-    }, "Failed to submit your nickname");
+    nickname.value = _nickname;
+  };
 
-  const startGame = () =>
-    busyHandler(
-      () => api.game.start.mutate({ room_code: room_code.value }),
-      (e) => `Failed to start game: ${e.message}`
-    );
+  const startGame = () => api.game.start.mutate({ room_code: room_code.value });
 
   return (
     <div id="waiting-room">
       <h2>Cards Against the Commune</h2>
+      {busy.value && <Throbber />}
       {!room_code.value && (
         <>
           <input
