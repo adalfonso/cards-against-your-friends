@@ -9,8 +9,8 @@
   "description": "Cards Against the Commune",
   "icons": [
     {
-      "src": "waygood.png",
-      "sizes": "256x256",
+      "src": "waygood-692x692.png",
+      "sizes": "692x692",
       "type": "image/png"
     }
   ]
