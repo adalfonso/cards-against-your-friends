@@ -23,6 +23,7 @@
     "express": "^4.19.2",
     "express-session": "^1.18.0",
     "preact": "^10.22.1",
+    "react-qr-code": "^2.0.15",
     "ws": "^8.18.0",
     "zod": "^3.23.8"
   },

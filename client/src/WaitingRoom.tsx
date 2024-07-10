@@ -9,6 +9,7 @@ import { Socket } from "./lib/websocket/Socket";
 import { getBaseUrl } from "./lib/utils";
 import { PlayerLobby } from "./WaitingRoom/PlayerLobby";
 import { Throbber } from "./Throbber";
+import QRCode from "react-qr-code";
 
 export const WaitingRoom = () => {
   const { room_code, is_owner, nickname, user_id, players } =
@@ -100,6 +101,10 @@ export const WaitingRoom = () => {
       {room_code.value && (
         <>
           <div className="room-code">{room_code.value}</div>
+
+          <div className="qr">
+            <QRCode value={window.location.href} size={128} />
+          </div>
 
           {!nickname.value && (
             <>
