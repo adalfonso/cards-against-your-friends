@@ -5,11 +5,18 @@ import "./PlayerTurn.scss";
 import { AppContext } from "./AppState";
 import { SelectedCards } from "./PlayerTurn/SelectedCards";
 import { Socket } from "./lib/websocket/Socket";
+import { PlayerState } from "@common/constants";
 
 export const PlayerTurn = () => {
   const selected_cards = useSignal<Array<string>>([]);
-  const { is_prompter, prompt, hand, prompt_response_count, room_code } =
-    useContext(AppContext);
+  const {
+    is_prompter,
+    prompt,
+    hand,
+    prompt_response_count,
+    room_code,
+    player_state,
+  } = useContext(AppContext);
 
   const cards = is_prompter.value ? [prompt.value] : hand.value;
 
@@ -30,6 +37,7 @@ export const PlayerTurn = () => {
     hand.value = hand.value.filter(
       (response) => !selected_cards.value.includes(response)
     );
+    player_state.value = PlayerState.WAITING_FOR_PROMPTEES;
   };
 
   return (

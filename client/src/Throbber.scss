@@ -1,56 +1,20 @@
-$throbber-size: 40px;
-
-.lds-ripple {
-  /* change color here */
-  color: #1a1a1a;
-}
-.lds-ripple,
-.lds-ripple div {
-  box-sizing: border-box;
-}
-.lds-ripple {
-  display: inline-block;
-  position: relative;
-  width: $throbber-size;
-  height: $throbber-size;
-}
-.lds-ripple div {
-  position: absolute;
-  border: 3px solid currentColor;
-  opacity: 1;
+.throbber {
+  width: 30px;
+  height: 30px;
+  border: 15px solid #666;
+  border-bottom-color: #bbb;
+  border-top-color: #bbb;
   border-radius: 50%;
-  animation: lds-ripple 1s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
 }
-.lds-ripple div:nth-child(2) {
-  animation-delay: -0.5s;
-}
-@keyframes lds-ripple {
+
+@keyframes rotation {
   0% {
-    top: calc(0.45 * $throbber-size);
-    left: 3calc (0.45 * $throbber-size);
-    width: calc(0.1 * $throbber-size);
-    height: calc(0.1 * $throbber-size);
-    opacity: 0;
-  }
-  4.9% {
-    top: calc(0.45 * $throbber-size);
-    left: calc(0.45 * $throbber-size);
-    width: calc(0.1 * $throbber-size);
-    height: calc(0.1 * $throbber-size);
-    opacity: 0;
-  }
-  5% {
-    top: calc(0.45 * $throbber-size);
-    left: calc(0.45 * $throbber-size);
-    width: calc(0.1 * $throbber-size);
-    height: calc(0.1 * $throbber-size);
-    opacity: 1;
+    transform: rotate(0deg);
   }
   100% {
-    top: 0;
-    left: 0;
-    width: $throbber-size;
-    height: $throbber-size;
-    opacity: 0;
+    transform: rotate(360deg);
   }
 }

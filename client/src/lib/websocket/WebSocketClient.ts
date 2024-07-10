@@ -82,7 +82,7 @@ const initPrompter = (data: { prompt: string; hand: Array<string> }) => {
   app_state.prompt.value = data.prompt;
   app_state.hand.value = data.hand;
   app_state.responses_for_prompter.value = {};
-  app_state.player_state.value = PlayerState.WAITING;
+  app_state.player_state.value = PlayerState.WAITING_FOR_PROMPTEES;
 };
 
 const initPromptee = (data: {
@@ -105,7 +105,7 @@ const deliverPromptResponses = (data: {
 };
 
 const waitForNextRound = () => {
-  app_state.player_state.value = PlayerState.WAITING;
+  app_state.player_state.value = PlayerState.WAITING_FOR_PROMPTER;
 };
 
 const awardPrompt = (data: { prompt: string; player: BasePlayer }) => {

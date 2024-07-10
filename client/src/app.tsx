@@ -21,12 +21,13 @@ export function App() {
     game_state.value === "ACTIVE" &&
     !round_starting &&
     ((player_state.value === PlayerState.DECIDING && !is_prompter.value) ||
-      (player_state.value === PlayerState.WAITING && is_prompter.value));
+      (player_state.value === PlayerState.WAITING_FOR_PROMPTEES &&
+        is_prompter.value));
 
-  const waiting_for_prompter =
+  const promptee_waiting =
     game_state.value === "ACTIVE" &&
     !round_starting &&
-    player_state.value === PlayerState.WAITING &&
+    /WAITING/.test(player_state.value) &&
     !is_prompter.value;
 
   const prompter_deciding =
@@ -42,7 +43,7 @@ export function App() {
       {game_state.value === "INIT" && <WaitingRoom />}
 
       {is_turn && <PlayerTurn />}
-      {waiting_for_prompter && <Waiting />}
+      {promptee_waiting && <Waiting />}
       {prompter_deciding && <PrompterDeciding />}
       {round_starting && <RoundStarting />}
 
