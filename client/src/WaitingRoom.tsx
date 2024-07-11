@@ -76,7 +76,7 @@ export const WaitingRoom = () => {
 
   return (
     <div id="waiting-room">
-      <h2>Cards Against the Commune</h2>
+      <h1>Cards Against the Commune</h1>
       {busy.value && <Throbber />}
       {!room_code.value && (
         <>
@@ -103,7 +103,7 @@ export const WaitingRoom = () => {
           <div className="room-code">{room_code.value}</div>
 
           <div className="qr">
-            <QRCode value={window.location.href} size={128} />
+            <QRCode value={window.location.href} size={112} />
           </div>
 
           {!nickname.value && (
