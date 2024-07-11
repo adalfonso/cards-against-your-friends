@@ -15,13 +15,14 @@ export const PlayerLobby = ({
   return (
     <div id="player-lobby">
       <h2>Lobby</h2>
+
       {players.value.map((player) => {
         return (
           <div
             className={
               player.user_id === user_id.value
-                ? "player-lobby-item self"
-                : "player-lobby-item"
+                ? "player-item self"
+                : "player-item"
             }
           >
             {player.nickname}

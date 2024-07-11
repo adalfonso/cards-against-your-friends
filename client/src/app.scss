@@ -21,7 +21,7 @@ input {
   padding: 0.5rem 0.75rem;
   font-size: 1.25em;
   border-radius: 0.25rem;
-  border: 1px solid #1a1a1a;
+  border: 1px solid #ddd;
 }
 
 p {
@@ -29,7 +29,7 @@ p {
 }
 
 $viewport-padding-x: 2.5rem;
-$viewport-padding-y: 2rem;
+$viewport-padding-y: 2.5rem;
 
 #app {
   padding: $viewport-padding-y $viewport-padding-x;

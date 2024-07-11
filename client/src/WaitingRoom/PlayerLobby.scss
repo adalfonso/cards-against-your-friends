@@ -4,21 +4,34 @@
   flex-direction: column;
   border: 1px solid #ddd;
   background-color: #f5f5f5;
-  padding: 2rem;
+  padding-top: 1rem;
   border-radius: 0.5rem;
 
-  .player-lobby-item {
-    border: 1px solid #bbb;
-    padding: 0.5rem;
-    background-color: #fafafa;
-    border-radius: 0.25rem;
-    position: relative;
+  h2 {
+    margin-bottom: 1rem;
+  }
 
-    &:nth-of-type(n + 2) {
-      margin-top: 0.75rem;
+  .player-item {
+    padding: 0.5rem 0;
+    position: relative;
+    border-top: 1px solid #ddd;
+    background-color: #fafafa;
+
+    &:last-of-type {
+      border-bottom: 0px solid transparent;
+      border-bottom-left-radius: 0.5rem;
+      border-bottom-right-radius: 0.5rem;
     }
 
     &.self::before {
+      content: "\2605";
+      color: #1a1a1a;
+      font-size: 2rem;
+      position: absolute;
+      left: 0.25rem;
+    }
+
+    &.self::after {
       content: "\2605";
       color: gold;
       font-size: 2rem;

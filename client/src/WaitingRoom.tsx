@@ -134,10 +134,6 @@ export const WaitingRoom = () => {
               START GAME
             </button>
           )}
-
-          {!is_owner.value && nickname.value.length > 0 && (
-            <p>Waiting for game owner to start...</p>
-          )}
         </>
       )}
 
