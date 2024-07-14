@@ -51,9 +51,6 @@ export const connectWebSocket = (onSuccess: (ws: WebSocket) => void) => {
       case WebSocketServerEvent.AwardPrompt:
         return awardPrompt(payload.data);
 
-      case WebSocketServerEvent.UpdatePlayers:
-        return updatePlayers(payload.data);
-
       case WebSocketServerEvent.ReconnectPlayer:
         return reconnectPlayer(payload.data);
 
@@ -68,8 +65,12 @@ export const connectWebSocket = (onSuccess: (ws: WebSocket) => void) => {
   return ws;
 };
 
-const stateUpdate = (data: { game_state: GameState }) => {
+const stateUpdate = (data: {
+  game_state: GameState;
+  players: Array<BasePlayer>;
+}) => {
   app_state.game_state.value = data.game_state;
+  app_state.players.value = data.players;
 };
 
 const informIdentity = (data: { user_id: string; nickname: string }) => {
@@ -78,8 +79,12 @@ const informIdentity = (data: { user_id: string; nickname: string }) => {
 };
 
 const initPrompter = (data: { prompt: string; hand: Array<string> }) => {
-  app_state.is_prompter.value = true;
   app_state.prompt.value = data.prompt;
+  if (app_state.is_host.value) {
+    return;
+  }
+
+  app_state.is_prompter.value = true;
   app_state.hand.value = data.hand;
   app_state.responses_for_prompter.value = {};
   app_state.player_state.value = PlayerState.WAITING_FOR_PROMPTEES;
@@ -117,10 +122,6 @@ const awardPrompt = (data: { prompt: string; player: BasePlayer }) => {
       data.prompt,
     ];
   }
-};
-
-const updatePlayers = (data: { players: Array<BasePlayer> }) => {
-  app_state.players.value = data.players;
 };
 
 const reconnectPlayer = (data: {

@@ -10,6 +10,7 @@ export type GameState = "INIT" | "ACTIVE" | "ENDED";
 const awarded_prompts = signal<Array<string>>([]);
 const game_state = signal<GameState>("INIT");
 const hand = signal<Array<string>>([]);
+const is_host = signal<Maybe<boolean>>(null);
 const is_owner = signal(false);
 const is_prompter = signal(false);
 const last_prompt_winner = signal<Maybe<BasePlayer>>(null);
@@ -26,6 +27,7 @@ export const app_state = {
   awarded_prompts,
   game_state,
   hand,
+  is_host,
   is_owner,
   is_prompter,
   last_prompt_winner,

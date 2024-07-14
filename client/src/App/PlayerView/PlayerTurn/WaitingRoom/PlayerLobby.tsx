@@ -3,8 +3,7 @@ import { useContext } from "preact/hooks";
 
 import "./PlayerLobby.scss";
 import { BasePlayer } from "@common/types";
-
-import { AppContext } from "../AppState";
+import { AppContext } from "@client/src/AppState";
 
 export const PlayerLobby = ({
   players,

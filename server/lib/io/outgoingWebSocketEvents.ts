@@ -64,7 +64,10 @@ export const waitForNextRound = (ws: WebSocket) => {
   );
 };
 
-export const stateUpdate = (ws: WebSocket, data: { game_state: GameState }) => {
+export const stateUpdate = (
+  ws: WebSocket,
+  data: { game_state: GameState; players: Array<BasePlayer> }
+) => {
   ws.send(
     JSON.stringify({
       event_type: WebSocketServerEvent.StateUpdate,
@@ -80,18 +83,6 @@ export const awardPrompt = (
   ws.send(
     JSON.stringify({
       event_type: WebSocketServerEvent.AwardPrompt,
-      data,
-    })
-  );
-};
-
-export const updatePlayers = (
-  ws: WebSocket,
-  data: { players: Array<BasePlayer> }
-) => {
-  ws.send(
-    JSON.stringify({
-      event_type: WebSocketServerEvent.UpdatePlayers,
       data,
     })
   );

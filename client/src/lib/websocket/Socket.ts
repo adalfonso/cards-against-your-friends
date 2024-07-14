@@ -32,6 +32,15 @@ export class Socket {
     );
   }
 
+  static connectAsHost(room_code: string) {
+    Socket.connection.send(
+      JSON.stringify({
+        event_type: WebSocketClientEvent.ConnectAsHost,
+        data: { room_code },
+      })
+    );
+  }
+
   static sendPromptResponses(
     room_code: string,
     prompt_responses: Array<string>

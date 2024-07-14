@@ -8,6 +8,7 @@ export default defineConfig({
   plugins: [preact()],
   resolve: {
     alias: {
+      "@client": path.resolve(__dirname, "./client"),
       "@common": path.resolve(__dirname, "./common"),
     },
   },

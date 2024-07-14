@@ -2,10 +2,11 @@ import { useContext } from "preact/hooks";
 import { useSignal } from "@preact/signals";
 
 import "./PlayerTurn.scss";
-import { AppContext } from "./AppState";
+import { AppContext } from "../../AppState";
 import { SelectedCards } from "./PlayerTurn/SelectedCards";
-import { Socket } from "./lib/websocket/Socket";
+import { Socket } from "../../lib/websocket/Socket";
 import { PlayerState } from "@common/constants";
+import { clean } from "@client/src/lib/utils";
 
 export const PlayerTurn = () => {
   const selected_cards = useSignal<Array<string>>([]);
@@ -84,13 +85,4 @@ export const PlayerTurn = () => {
       )}
     </div>
   );
-};
-
-// Attaches punctuation and normalizes blank spaces
-const clean = (str: string) => {
-  const punctuationRegex = /[.,;:?!]$/;
-
-  str = str.replace(/_+/g, "______");
-
-  return punctuationRegex.test(str) ? str : str + ".";
 };

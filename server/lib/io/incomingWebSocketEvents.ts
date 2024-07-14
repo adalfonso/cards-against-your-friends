@@ -10,6 +10,19 @@ export const identify = (ws: WebSocket, data: { user_id: string }) => {
   outgoing.informIdentity(ws, data.user_id);
 };
 
+export const connectAsHost = (
+  ws: WebSocket,
+  data: { user_id: string; room_code: string }
+) => {
+  const game = games.get(data.room_code);
+
+  if (!game) {
+    return console.error("Could not find game when connecting host");
+  }
+
+  game.addHost(data.user_id, ws);
+};
+
 // Updates nickname for a client
 export const setNickname = (
   ws: WebSocket,

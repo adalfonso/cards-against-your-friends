@@ -1,7 +1,7 @@
 import { useContext } from "preact/hooks";
 
 import "./GameHeader.scss";
-import { AppContext } from "./AppState";
+import { AppContext } from "../../AppState";
 
 export const GameHeader = () => {
   const { nickname, awarded_prompts } = useContext(AppContext);

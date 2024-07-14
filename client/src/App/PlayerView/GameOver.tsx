@@ -1,8 +1,8 @@
 import "./GameOver.scss";
-import { AppContext } from "./AppState";
+import { AppContext } from "../../AppState";
 import { useContext } from "preact/hooks";
 import { WINNING_COUNT } from "@common/constants";
-import { getBaseUrl } from "./lib/utils";
+import { getBaseUrl } from "../../lib/utils";
 
 export const GameOver = () => {
   const { awarded_prompts } = useContext(AppContext);

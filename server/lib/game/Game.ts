@@ -1,8 +1,9 @@
-import { BasePlayer, Maybe } from "@common/types";
-import * as outgoing from "../io/outgoingWebSocketEvents";
-import { WebSocket } from "ws";
-import { CARD_HAND_SIZE, WINNING_COUNT } from "@common/constants";
 import { GameState } from "@prisma/client";
+import { WebSocket } from "ws";
+
+import * as outgoing from "../io/outgoingWebSocketEvents";
+import { BasePlayer, Maybe } from "@common/types";
+import { CARD_HAND_SIZE, WINNING_COUNT } from "@common/constants";
 
 type ContentStore = {
   prompts: Array<string>;
@@ -11,14 +12,19 @@ type ContentStore = {
 
 type Player = BasePlayer & {
   ws: WebSocket;
-  awarded_prompts: Array<string>;
-  prompt: string;
-  hand: Array<string>;
+};
+
+type Host = {
+  user_id: string;
+  ws: WebSocket;
 };
 
 export class Game {
   // All game players
   public _players = new Map<string, Player>();
+
+  // All game hosts
+  public _hosts = new Map<string, Host>();
 
   // Current player to prompt others
   private _current_prompter: Maybe<Player> = null;
@@ -87,7 +93,13 @@ export class Game {
       nickname,
     });
 
-    this._sendUpdatePlayers();
+    this._sendGameUpdate();
+  }
+
+  public addHost(user_id: string, ws: WebSocket) {
+    this._hosts.set(user_id, { user_id, ws });
+
+    this._sendGameUpdate();
   }
 
   private _reconnectPlayer(player: Player, nickname: string, ws: WebSocket) {
@@ -106,13 +118,10 @@ export class Game {
         : {},
       game_state: this._game_state,
       is_owner: this._owner_id === player.user_id,
-      players: this.players.map(({ user_id, nickname }) => ({
-        user_id,
-        nickname,
-      })),
+      players: this.players.map(({ ws, ...player }) => player),
     });
 
-    this._sendUpdatePlayers();
+    this._sendGameUpdate();
   }
 
   public start() {
@@ -122,11 +131,24 @@ export class Game {
 
     this._game_state = GameState.ACTIVE;
 
+    this._sendGameUpdate();
+    this.nextTurn();
+  }
+
+  private _sendGameUpdate() {
     this._players.forEach(({ ws }) =>
-      outgoing.stateUpdate(ws, { game_state: this._game_state })
+      outgoing.stateUpdate(ws, {
+        game_state: this._game_state,
+        players: this.players.map(({ ws, ...player }) => player),
+      })
     );
 
-    this.nextTurn();
+    this._hosts.forEach(({ ws }) => {
+      outgoing.stateUpdate(ws, {
+        game_state: this._game_state,
+        players: this.players.map(({ ws, ...player }) => player),
+      });
+    });
   }
 
   public nextTurn() {
@@ -173,28 +195,29 @@ export class Game {
   }
 
   public awardPrompt(player_id: string, prompt: string) {
-    const player = this._players.get(player_id);
+    const awarded_player = this._players.get(player_id);
 
-    if (!player) {
+    if (!awarded_player) {
       throw new Error("Could not find player to award prompt to");
     }
 
-    player.awarded_prompts.push(prompt);
+    awarded_player.awarded_prompts.push(prompt);
 
-    if (player.awarded_prompts.length < WINNING_COUNT) {
+    if (awarded_player.awarded_prompts.length < WINNING_COUNT) {
+      const { ws, ...awarded_player_no_ws } = awarded_player;
+
       this._players.forEach(({ ws }) =>
-        outgoing.awardPrompt(ws, {
-          prompt,
-          player: { user_id: player.user_id, nickname: player.nickname },
-        })
+        outgoing.awardPrompt(ws, { prompt, player: awarded_player_no_ws })
+      );
+
+      this._hosts.forEach(({ ws }) =>
+        outgoing.awardPrompt(ws, { prompt, player: awarded_player_no_ws })
       );
     } else {
       this._game_state = GameState.ENDED;
-
-      this._players.forEach(({ ws }) =>
-        outgoing.stateUpdate(ws, { game_state: this._game_state })
-      );
     }
+
+    this._sendGameUpdate();
   }
 
   private _getPrompt() {
@@ -218,9 +241,10 @@ export class Game {
 
     this._current_response_count = countPrompts(prompt);
 
-    outgoing.initPrompter(player.ws, {
-      prompt,
-      hand: player.hand,
+    outgoing.initPrompter(player.ws, { prompt, hand: player.hand });
+
+    this._hosts.forEach(({ ws }) => {
+      outgoing.initPrompter(ws, { prompt, hand: player.hand });
     });
 
     return prompt;
@@ -259,17 +283,6 @@ export class Game {
         ) as Player;
       }
     }
-  }
-
-  private _sendUpdatePlayers() {
-    this._players.forEach(({ ws }) =>
-      outgoing.updatePlayers(ws, {
-        players: this.players.map(({ user_id, nickname }) => ({
-          user_id,
-          nickname,
-        })),
-      })
-    );
   }
 }
 

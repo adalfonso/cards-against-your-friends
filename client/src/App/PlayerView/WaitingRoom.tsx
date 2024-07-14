@@ -2,14 +2,15 @@ import { computed, useSignal } from "@preact/signals";
 import { useContext, useEffect } from "preact/hooks";
 
 import "./WaitingRoom.scss";
-import { AppContext } from "./AppState";
-import { api } from "./Api";
-import { Socket } from "./lib/websocket/Socket";
+import { AppContext } from "../../AppState";
+import { api, preConnect } from "../../lib/http/Api";
+import { Socket } from "../../lib/websocket/Socket";
 
-import { getBaseUrl } from "./lib/utils";
-import { PlayerLobby } from "./WaitingRoom/PlayerLobby";
-import { Throbber } from "./Throbber";
+import { getBaseUrl } from "../../lib/utils";
+
+import { Throbber } from "../Throbber";
 import QRCode from "react-qr-code";
+import { PlayerLobby } from "./PlayerTurn/WaitingRoom/PlayerLobby";
 
 export const WaitingRoom = () => {
   const { room_code, is_owner, nickname, user_id, players } =
@@ -37,11 +38,6 @@ export const WaitingRoom = () => {
     url.searchParams.set("code", code.toUpperCase());
 
     window.location.href = url.toString();
-  };
-
-  const preConnect = async () => {
-    await api.game.startSession.mutate();
-    await Socket.init();
   };
 
   const joinGame = async (code: string) => {

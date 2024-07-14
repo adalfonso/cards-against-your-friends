@@ -2,9 +2,9 @@ import { computed, useSignal } from "@preact/signals";
 import { useContext } from "preact/hooks";
 
 import "./PlayerTurn.scss";
-import { AppContext } from "./AppState";
+import { AppContext } from "../../AppState";
 import { SelectedCards } from "./PlayerTurn/SelectedCards";
-import { Socket } from "./lib/websocket/Socket";
+import { Socket } from "../../lib/websocket/Socket";
 
 export const PrompterDeciding = () => {
   const { prompt, responses_for_prompter, room_code } = useContext(AppContext);

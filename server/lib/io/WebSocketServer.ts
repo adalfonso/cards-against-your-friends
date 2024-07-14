@@ -34,6 +34,9 @@ export const createWebSocketServer = () => {
         case WebSocketClientEvent.Identify:
           return incoming.identify(ws, { user_id });
 
+        case WebSocketClientEvent.ConnectAsHost:
+          return incoming.connectAsHost(ws, { user_id, ...payload.data });
+
         case WebSocketClientEvent.SetNickname:
           return incoming.setNickname(ws, { user_id, ...payload.data });
 

@@ -2,8 +2,8 @@ import { computed } from "@preact/signals";
 import { useContext, useEffect, useState } from "preact/hooks";
 
 import "./RoundStarting.scss";
-import { AppContext } from "./AppState";
-import { Throbber } from "./Throbber";
+import { AppContext } from "@client/src/AppState";
+import { Throbber } from "../Throbber";
 
 export const RoundStarting = () => {
   const { last_prompt_winner, user_id } = useContext(AppContext);

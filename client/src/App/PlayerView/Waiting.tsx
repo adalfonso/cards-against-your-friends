@@ -1,8 +1,8 @@
 import { useContext } from "preact/hooks";
 
 import "./Waiting.scss";
-import { AppContext } from "./AppState";
-import { Throbber } from "./Throbber";
+import { AppContext } from "../../AppState";
+import { Throbber } from "../Throbber";
 import { PlayerState } from "@common/constants";
 import { computed } from "@preact/signals";
 
