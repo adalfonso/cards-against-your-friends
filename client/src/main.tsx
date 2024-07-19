@@ -1,5 +1,5 @@
 import { render } from "preact";
-import { App } from "./app.tsx";
+import { App } from "./App.tsx";
 import { AppContext, app_state } from "./AppState.ts";
 
 if ("serviceWorker" in navigator) {

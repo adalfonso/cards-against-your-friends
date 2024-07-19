@@ -97,7 +97,24 @@ export class Game {
   }
 
   public addHost(user_id: string, ws: WebSocket) {
+    const existing_host = this._hosts.get(user_id);
+
+    if (existing_host) {
+      existing_host.ws = ws;
+    }
+
     this._hosts.set(user_id, { user_id, ws });
+
+    outgoing.reconnectPlayer((this._hosts.get(user_id) as Host).ws, {
+      is_prompter: false,
+      hand: [],
+      awarded_prompts: [],
+      prompt: this._current_prompter?.prompt ?? "",
+      responses_for_prompter: {},
+      game_state: this._game_state,
+      is_owner: false,
+      players: this.players.map(({ ws, ...player }) => player),
+    });
 
     this._sendGameUpdate();
   }
@@ -161,6 +178,7 @@ export class Game {
     this._rotatePrompter();
     this._nextTurnPrompter(this.prompter);
     this.promptees.forEach((promptee) => this._nextTurnPromptee(promptee));
+    this._sendGameUpdate();
   }
 
   public receivePromptResponses(

@@ -1,4 +1,9 @@
 #host-dashboard {
+  h1 {
+    margin-bottom: 2em;
+    text-align: center;
+  }
+
   position: relative;
 
   .players {
@@ -20,6 +25,10 @@
     position: absolute;
     width: 20rem;
     left: calc(50% - 10rem);
+
+    h2 {
+      text-align: center;
+    }
     .playing-card {
       margin: 0;
     }

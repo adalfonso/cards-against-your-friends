@@ -1,6 +1,7 @@
+import { useContext } from "preact/hooks";
+
 import "./GameOver.scss";
 import { AppContext } from "../../AppState";
-import { useContext } from "preact/hooks";
 import { WINNING_COUNT } from "@common/constants";
 import { getBaseUrl } from "../../lib/utils";
 

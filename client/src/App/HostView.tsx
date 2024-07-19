@@ -15,6 +15,10 @@ export const HostView = () => {
 
   const round_starting = computed(() => !!last_prompt_winner.value);
 
+  const prompter = computed(() =>
+    players.value.find((player) => player.prompt === prompt.value)
+  );
+
   useEffect(() => {
     const code = new URL(window.location.href).searchParams.get("code");
 
@@ -44,6 +48,7 @@ export const HostView = () => {
 
   return (
     <div id="host-dashboard">
+      <h1>Cards Against the Commune</h1>
       <div className="players">
         {players.value.map((player) => {
           return (
@@ -56,6 +61,7 @@ export const HostView = () => {
 
         {prompt.value && (
           <div className="prompt">
+            <h2>{prompter.value?.nickname}'S TURN</h2>
             <div className="playing-card prompt-card">
               <div className="card-text">{clean(prompt.value)}</div>
               <div className="card-logo"></div>
