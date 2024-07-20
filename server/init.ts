@@ -5,7 +5,6 @@ import cookieParser from "cookie-parser";
 
 import { initRouter } from "@routes/router";
 import { createWebSocketServer } from "./lib/io/WebSocketServer";
-import { Database } from "./lib/data/Database";
 
 declare module "express-session" {
   interface Session {
@@ -36,15 +35,12 @@ export const init = async (app: Express) => {
   initRouter(app);
   const wss = createWebSocketServer();
 
-  await Database.instance().game.deleteMany();
-
   return { env, wss, sessionParser };
 };
 
 // List of required env vars
 const required_vars = [
   "HOST",
-  "DATABASE_URL",
   "NODE_ENV",
   "NODE_PORT",
   "SOURCE_DIR",

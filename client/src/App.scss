@@ -31,6 +31,10 @@ p {
 $viewport-padding-x: 2.5rem;
 $viewport-padding-y: 2.5rem;
 
+.center {
+  text-align: center;
+}
+
 #app {
   padding: $viewport-padding-y $viewport-padding-x;
   height: calc(100% - $viewport-padding-y * 2);

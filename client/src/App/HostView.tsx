@@ -41,7 +41,7 @@ export const HostView = () => {
     const winner = players.value.find(
       (player) => player.awarded_prompts.length === WINNING_COUNT
     );
-    return <h1>{winner?.nickname} won!</h1>;
+    return <h1 className="center">{winner?.nickname} won!</h1>;
   } else if (round_starting.value) {
     return <RoundStarting />;
   }

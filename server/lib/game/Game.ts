@@ -1,8 +1,7 @@
-import { GameState } from "@prisma/client";
 import { WebSocket } from "ws";
 
 import * as outgoing from "../io/outgoingWebSocketEvents";
-import { BasePlayer, Maybe } from "@common/types";
+import { BasePlayer, GameState, Maybe } from "@common/types";
 import { CARD_HAND_SIZE, WINNING_COUNT } from "@common/constants";
 
 type ContentStore = {
@@ -45,6 +44,10 @@ export class Game {
   ) {
     shuffle(this._content.prompts);
     shuffle(this._content.prompt_responses);
+  }
+
+  get data() {
+    return { room_code: this.room_code, owner_id: this._owner_id };
   }
 
   get room_code() {

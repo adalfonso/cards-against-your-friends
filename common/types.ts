@@ -29,3 +29,11 @@ export type BasePlayer = {
   prompt: string;
   hand: Array<string>;
 };
+
+export const GameState = {
+  INIT: "INIT",
+  ACTIVE: "ACTIVE",
+  ENDED: "ENDED",
+} as const;
+
+export type GameState = (typeof GameState)[keyof typeof GameState];

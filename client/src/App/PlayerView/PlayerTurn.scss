@@ -45,24 +45,21 @@
     }
   }
 
+  .card-bottom {
+    display: flex;
+    justify-content: space-between;
+
+    .card-logo {
+      background: url("waygood.svg") no-repeat center;
+      background-size: contain;
+      height: 2rem;
+      width: 2rem;
+    }
+  }
+
   &.prompt-card {
     background-color: #1a1a1a;
     color: #fafafa;
-  }
-
-  > .star {
-    text-align: right;
-  }
-
-  > .card-logo {
-    background: url("waygood.svg") no-repeat center;
-    background-size: contain;
-    height: 2rem;
-    width: 2rem;
-    position: absolute;
-    left: 2rem;
-    bottom: 1.5rem;
-    padding: 0;
   }
 
   &:last-of-type {

@@ -1,7 +1,6 @@
-import { GameState } from "@prisma/client";
 import { WebSocket } from "ws";
 
-import { BasePlayer, WebSocketServerEvent } from "@common/types";
+import { BasePlayer, GameState, WebSocketServerEvent } from "@common/types";
 import { nicknames } from "./WebSocketServer";
 
 export const initPrompter = (

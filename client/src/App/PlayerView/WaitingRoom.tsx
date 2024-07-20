@@ -46,8 +46,7 @@ export const WaitingRoom = () => {
       const game = await api.game.join.mutate({ room_code: code });
 
       room_code.value = game.room_code;
-      is_owner.value =
-        user_id.value !== "" && user_id.value === game.created_by;
+      is_owner.value = user_id.value !== "" && user_id.value === game.owner_id;
     } catch (e) {
       alert("Failed to join game");
 

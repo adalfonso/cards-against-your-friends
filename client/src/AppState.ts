@@ -2,13 +2,10 @@ import { signal } from "@preact/signals";
 import { createContext } from "preact";
 
 import { PlayerState } from "@common/constants";
-import { BasePlayer, Maybe } from "@common/types";
-
-// TODO: keep up to date with prisma
-export type GameState = "INIT" | "ACTIVE" | "ENDED";
+import { BasePlayer, GameState, Maybe } from "@common/types";
 
 const awarded_prompts = signal<Array<string>>([]);
-const game_state = signal<GameState>("INIT");
+const game_state = signal<GameState>(GameState.INIT);
 const hand = signal<Array<string>>([]);
 const is_host = signal<Maybe<boolean>>(null);
 const is_owner = signal(false);

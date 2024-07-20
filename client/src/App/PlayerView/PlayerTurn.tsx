@@ -59,9 +59,11 @@ export const PlayerTurn = () => {
               }}
             >
               <div className="card-text">{cleaned_text}</div>
-              <div className="card-logo"></div>
 
-              {selected && <div className="star">★</div>}
+              <div className="card-bottom">
+                <div className="card-logo"></div>
+                {selected && <div className="star">★</div>}
+              </div>
             </div>
           );
         })}

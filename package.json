@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "npx prisma generate && nodemon --watch './server' -e ts --exec 'node --loader @esbuild-kit/esm-loader ./server/index.dev.ts'",
-    "start": "npx prisma generate && pnpm build && node --loader @esbuild-kit/esm-loader ./server/index.ts",
+    "dev": "nodemon --watch './server' -e ts --exec 'node --loader @esbuild-kit/esm-loader ./server/index.dev.ts'",
+    "start": "pnpm build && node --loader @esbuild-kit/esm-loader ./server/index.ts",
     "build": "vite build",
     "docker": "docker-compose up --build",
     "docker:dev": "docker-compose -f docker-compose.dev.yml up --build",
@@ -15,7 +15,6 @@
   },
   "dependencies": {
     "@preact/signals": "^1.2.3",
-    "@prisma/client": "^5.16.1",
     "@trpc/client": "^10.45.2",
     "@trpc/server": "^10.45.2",
     "cookie-parser": "^1.4.6",
@@ -41,7 +40,6 @@
     "eslint": "^9.6.0",
     "nodemon": "^3.1.4",
     "prettier": "^3.3.2",
-    "prisma": "^5.16.1",
     "sass": "^1.77.6",
     "typescript": "^5.5.3",
     "vite": "^5.3.3"

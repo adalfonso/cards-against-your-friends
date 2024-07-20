@@ -1,7 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { GameState } from "@prisma/client";
 
-import { Database } from "@server/lib/data/Database";
 import { Request } from "@server/trpc";
 import { clients, games, nicknames } from "@server/lib/io/WebSocketServer";
 import { roomCodePayloadSchema } from "@server/schema/GameSchema";
@@ -14,17 +12,12 @@ export const GameController = {
   create: async ({ ctx: { user_id } }: Request) => {
     const ws = getWebSocketOrThrow(user_id);
     const room_code = makeCode(4);
-
-    const game_document = await Database.instance().game.create({
-      data: { room_code, created_by: user_id },
-    });
-
     const game = Game.create(room_code, user_id, { prompts, prompt_responses });
-    games.set(room_code, game);
 
+    games.set(room_code, game);
     game.addPlayer(user_id, nicknames.get(user_id) ?? "", ws);
 
-    return game_document;
+    return game.data;
   },
 
   join: async ({
@@ -33,16 +26,11 @@ export const GameController = {
   }: Request<typeof roomCodePayloadSchema>) => {
     const ws = getWebSocketOrThrow(user_id);
     const room_code = input.room_code.toUpperCase();
+    const game = getGameInstanceOrThrow(room_code);
 
-    const game_document = await Database.instance().game.findFirstOrThrow({
-      where: { room_code },
-    });
+    game.addPlayer(user_id, nicknames.get(user_id) ?? "", ws);
 
-    const game_instance = getGameInstanceOrThrow(room_code);
-
-    game_instance.addPlayer(user_id, nicknames.get(user_id) ?? "", ws);
-
-    return game_document;
+    return game.data;
   },
 
   start: async ({
@@ -51,20 +39,16 @@ export const GameController = {
   }: Request<typeof roomCodePayloadSchema>) => {
     const { room_code } = input;
 
-    const game_instance = getGameInstanceOrThrow(room_code);
+    const game = getGameInstanceOrThrow(room_code);
 
-    const game = await Database.instance().game.findUniqueOrThrow({
-      where: { room_code },
-    });
-
-    if (game.created_by !== user_id) {
+    if (game.data.owner_id !== user_id) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
         message: "Only the creator of the game can start it",
       });
     }
 
-    const missing_nickname = game_instance.players.find(
+    const missing_nickname = game.players.find(
       ({ user_id }) => !nicknames.has(user_id)
     );
 
@@ -75,18 +59,7 @@ export const GameController = {
       });
     }
 
-    game_instance.start();
-
-    await Database.instance().game.update({
-      where: { id: game.id },
-      data: {
-        players: game_instance.players.map(({ user_id }) => [
-          user_id,
-          nicknames.get(user_id) ?? "",
-        ]),
-        state: GameState.ACTIVE,
-      },
-    });
+    game.start();
   },
 };
 
