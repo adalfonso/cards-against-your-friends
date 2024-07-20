@@ -1,3 +1,4 @@
+import compression from "compression";
 import express, { Request } from "express";
 import fs from "node:fs";
 import https from "node:https";
@@ -11,6 +12,8 @@ import { init } from "./init";
     key: fs.readFileSync(`${env.SSL_PATH}/cayf.key`),
     cert: fs.readFileSync(`${env.SSL_PATH}/cayf.crt`),
   };
+
+  app.use(compression());
 
   // Must run after history fallback
   app.use(express.static(env.SOURCE_DIR));

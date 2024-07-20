@@ -11,12 +11,14 @@
     "docker:dev": "docker-compose -f docker-compose.dev.yml up --build",
     "docker:publish": "docker build -t adalfonso/cayf:latest . && docker push adalfonso/cayf:latest",
     "check": "tsc --noEmit && pnpm lint",
-    "lint": "eslint --quiet"
+    "lint": "eslint --quiet",
+    "viz": "npx vite-bundle-visualizer"
   },
   "dependencies": {
     "@preact/signals": "^1.2.3",
     "@trpc/client": "^10.45.2",
     "@trpc/server": "^10.45.2",
+    "compression": "^1.7.4",
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
@@ -29,6 +31,7 @@
   "devDependencies": {
     "@esbuild-kit/esm-loader": "^2.6.5",
     "@preact/preset-vite": "^2.8.3",
+    "@types/compression": "^1.7.5",
     "@types/cookie-parser": "^1.4.7",
     "@types/express": "^4.17.21",
     "@types/express-session": "^1.18.0",
