@@ -12,7 +12,10 @@ export const GameController = {
   create: async ({ ctx: { user_id } }: Request) => {
     const ws = getWebSocketOrThrow(user_id);
     const room_code = makeCode(4);
-    const game = Game.create(room_code, user_id, { prompts, prompt_responses });
+    const game = Game.create(room_code, user_id, {
+      prompts: [...prompts],
+      prompt_responses: [...prompt_responses],
+    });
 
     games.set(room_code, game);
     game.addPlayer(user_id, nicknames.get(user_id) ?? "", ws);
