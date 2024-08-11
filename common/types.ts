@@ -17,6 +17,7 @@ export const WebSocketServerEvent = {
   ReconnectPlayer: "RECONNECT_PLAYER",
   StateUpdate: "STATE_UPDATE",
   WaitForNextRound: "WAIT_FOR_NEXT_ROUND",
+  Heartbeat: "HEARTBEAT",
 } as const;
 
 export type WebSocketServerEvent =

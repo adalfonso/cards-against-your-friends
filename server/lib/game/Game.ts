@@ -37,6 +37,8 @@ export class Game {
   // State of the game
   private _game_state: GameState = GameState.INIT;
 
+  private _heartbeat_interval: ReturnType<typeof setInterval>;
+
   constructor(
     private _room_code: string,
     private _owner_id: string,
@@ -44,6 +46,11 @@ export class Game {
   ) {
     shuffle(this._content.prompts);
     shuffle(this._content.prompt_responses);
+
+    this._heartbeat_interval = setInterval(
+      () => this._players.forEach(({ ws }) => outgoing.heartbeat(ws, {})),
+      15e3
+    );
   }
 
   get data() {
@@ -236,6 +243,8 @@ export class Game {
       );
     } else {
       this._game_state = GameState.ENDED;
+
+      clearInterval(this._heartbeat_interval);
     }
 
     this._sendGameUpdate();

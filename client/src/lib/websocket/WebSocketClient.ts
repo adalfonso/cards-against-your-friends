@@ -54,6 +54,9 @@ export const connectWebSocket = (onSuccess: (ws: WebSocket) => void) => {
       case WebSocketServerEvent.ReconnectPlayer:
         return reconnectPlayer(payload.data);
 
+      case WebSocketServerEvent.Heartbeat:
+        return heartbeat(payload.data);
+
       default:
         console.error(
           "Received unknown websocket event type:",
@@ -153,3 +156,5 @@ const reconnectPlayer = (data: {
     app_state.player_state.value = PlayerState.DECIDING;
   }
 };
+
+const heartbeat = (data: {}) => {};

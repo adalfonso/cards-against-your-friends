@@ -87,6 +87,15 @@ export const awardPrompt = (
   );
 };
 
+export const heartbeat = (ws: WebSocket, data: {}) => {
+  ws.send(
+    JSON.stringify({
+      event_type: WebSocketServerEvent.Heartbeat,
+      data,
+    })
+  );
+};
+
 export const reconnectPlayer = (
   ws: WebSocket,
   data: {
